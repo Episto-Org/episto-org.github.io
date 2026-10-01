@@ -55,7 +55,11 @@
     <label for="my-password">Episto password</label>
     <input type="password" id="my-password" autocomplete="current-password" spellcheck="false">
   </div>
-  <div class="row"><button type="button" id="unlock" class="primary">Unlock</button></div>
+  <div>
+    <label><input type="checkbox" id="remember"> Remember me on this device for 30 days</label>
+    <span class="hint">Keeps your pseudonym, entry and key in this browser, never your password. Anyone using this browser can act as you until it expires: only on a device that is yours alone.</span>
+  </div>
+  <div class="row"><button type="button" id="unlock" class="primary">Unlock</button> <button type="button" id="forget" hidden>Forget me</button></div>
   <p id="unlock-status" aria-live="polite"></p>
 </section>
 

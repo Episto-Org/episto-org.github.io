@@ -5,6 +5,7 @@ import { h, $, clear, status } from './dom.js';
 import { parseEntry } from './pools.js';
 import { deriveKey, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
 import { readBundle } from './bundle.js';
+import { remember, recall, forget } from './remember.js';
 
 let cfg;
 let me = null; // { pseudonym, key }
@@ -43,9 +44,35 @@ async function unlock() {
   } catch {
     // no entry pasted: nothing to compare with
   }
+  if ($('#remember').checked) {
+    const until = await remember({ pseudonym, entry: $('#current').value, key });
+    note += until ? ` Remembered on this device until ${until.toISOString().slice(0, 10)}.` : ' This browser would not keep it, so you will unlock again next time.';
+    $('#forget').hidden = !until;
+  }
+  $('#my-password').value = '';
   status(out, `${note} Requests are checked by the steward against the members list.`, 'ok');
+  showUnlocked();
+}
+
+function showUnlocked() {
   $('#invite').hidden = !cfg.sealedRegister;
   $('#requests').hidden = !cfg.sealedRegister;
+}
+
+/** Opens unlocked when "Remember me" was chosen on this device. */
+async function restore() {
+  const saved = await recall();
+  if (!saved) return;
+  me = { pseudonym: saved.pseudonym, key: saved.key };
+  $('#me').value = saved.pseudonym;
+  if (saved.entry && !$('#current').value.trim()) {
+    $('#current').value = saved.entry;
+    $('#current').dispatchEvent(new Event('input'));
+  }
+  $('#remember').checked = true;
+  $('#forget').hidden = false;
+  status($('#unlock-status'), `Unlocked as ${saved.pseudonym}, remembered on this device until ${saved.until.toISOString().slice(0, 10)}.`, 'ok');
+  showUnlocked();
 }
 
 function addEntry(membersText, entryText) {
@@ -160,6 +187,16 @@ export function initRegister(config) {
   $('#prepare-invite').addEventListener('click', () => prepareInvite().catch(fail('#invite-status')));
   $('#seal-request').addEventListener('click', () => sealOne().catch(fail('#request-status')));
   $('#np-make').addEventListener('click', () => newKey().catch(fail('#np-status')));
+  $('#forget').addEventListener('click', async () => {
+    await forget();
+    me = null;
+    $('#forget').hidden = true;
+    $('#remember').checked = false;
+    $('#invite').hidden = true;
+    $('#requests').hidden = true;
+    status($('#unlock-status'), 'Forgotten on this device. Unlock with your password next time.', 'ok');
+  });
+  restore();
   $('#np-suggest').addEventListener('click', () => {
     const p = suggestPassword();
     $('#np-password').value = p;

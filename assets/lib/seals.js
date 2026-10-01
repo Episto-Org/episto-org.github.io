@@ -52,16 +52,19 @@ const hex = (buf) => [...new Uint8Array(buf)].map((x) => x.toString(16).padStart
 
 /**
  * The member's key from pseudonym and password.
- * @returns {Promise<{privateKey: CryptoKey, publicBlob: Uint8Array, publicLine: string}>}
+ * `lockedKey` signs the same way but can never be exported: it is the one
+ * "Remember me" keeps in the browser.
+ * @returns {Promise<{privateKey: CryptoKey, lockedKey: CryptoKey, publicBlob: Uint8Array, publicLine: string}>}
  */
 export async function deriveKey(pseudonym, password) {
   const base = await subtle().importKey('raw', utf8(password), 'PBKDF2', false, ['deriveBits']);
   const seed = new Uint8Array(await subtle().deriveBits(
     { name: 'PBKDF2', hash: 'SHA-256', salt: utf8(`${SEAL_VERSION}:${pseudonym}`), iterations: KDF_ITERATIONS }, base, 256));
   const privateKey = await subtle().importKey('pkcs8', concat(PKCS8_ED25519, seed), { name: 'Ed25519' }, true, ['sign']);
+  const lockedKey = await subtle().importKey('pkcs8', concat(PKCS8_ED25519, seed), { name: 'Ed25519' }, false, ['sign']);
   const raw = fromBase64((await subtle().exportKey('jwk', privateKey)).x);
   const publicBlob = concat(sshString(utf8('ssh-ed25519')), sshString(raw));
-  return { privateKey, publicBlob, publicLine: `ssh-ed25519 ${toBase64(publicBlob)}` };
+  return { privateKey, lockedKey, publicBlob, publicLine: `ssh-ed25519 ${toBase64(publicBlob)}` };
 }
 
 /** An SSHSIG signature (armored, as ssh-keygen -Y sign writes it). */
