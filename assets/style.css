@@ -257,3 +257,26 @@ textarea.medium { min-height: 8rem; }
 
 nav.member-tools ul { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.95rem; }
 nav.member-tools a[aria-current="page"] { font-weight: 600; text-decoration: none; color: inherit; }
+
+/* Logic map: the load-bearing claim at the centre, its connections in orbit. */
+.logic-map { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
+.logic-map .lm-ring { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 6 6; }
+.logic-map .lm-edge { stroke: var(--muted); stroke-width: 2; }
+.logic-map .lm-breaks { stroke: var(--critical); stroke-width: 3; }
+.logic-map .lm-shows { stroke-dasharray: 5 4; }
+.logic-map .lm-head { fill: var(--muted); }
+.logic-map .lm-tee { stroke: var(--critical); stroke-width: 3; fill: none; }
+.logic-map .lm-node circle { fill: var(--surface); stroke: var(--text); stroke-width: 2; }
+.logic-map .lm-node text { fill: var(--text); font: 600 15px system-ui, sans-serif; pointer-events: none; }
+.logic-map .lm-center circle { stroke-width: 7; }
+.logic-map .lm-fails circle { stroke: var(--critical); fill: var(--critical-bg); }
+.logic-map .lm-evidence circle { stroke: var(--accent); stroke-dasharray: 3 3; }
+.logic-map .lm-cites circle { stroke: var(--propagated); }
+.logic-map .lm-falls circle { stroke: var(--critical); stroke-dasharray: 6 4; }
+.logic-map .lm-selected circle { stroke: var(--focus); stroke-width: 5; }
+.logic-map [tabindex] { cursor: pointer; }
+.logic-map [tabindex]:focus-visible circle { stroke: var(--focus); stroke-width: 5; }
+.logic-line code { white-space: normal; overflow-wrap: anywhere; }
+.logic-key { padding-left: 1.2rem; }
+.logic-key .is-center { font-weight: 600; }
+.logic-step.is-selected { outline: 3px solid var(--focus); outline-offset: 2px; }

@@ -1,5 +1,6 @@
 // The flag builder: a form that writes a valid flag file.
 
+import { logicMap, targetsFor } from './logicmap.js';
 import { normalizeDoi, doiSlug } from '../lib/doi.js';
 import { h, $, clear, severityChip, download } from './dom.js';
 import { loadTaxonomy } from './data.js';
@@ -148,31 +149,84 @@ const STEP_FIELDS = {
   so: [['so', 'So (what falls with it)']],
 };
 
+const ROLE_TITLE = { claim: 'Claims', cites: 'Rests on another paper', fails: 'Fails', so: 'So' };
+const LETTER = { claim: 'C', cites: 'P', fails: 'F', so: 'S' };
+let selectedStep = null;
+
 function addStep(kind) {
   const row = h('div', { class: 'logic-step stack', 'data-kind': kind },
-    h('p', null, h('strong', null, { claim: 'Claims', cites: 'Rests on', fails: 'Fails', so: 'So' }[kind])),
-    ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))));
+    h('p', null, h('strong', { class: 'step-name' }, ''), ` ${ROLE_TITLE[kind]}`),
+    ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))),
+    h('div', { class: 'arrows stack' }));
   const remove = h('button', { type: 'button' }, 'Remove');
   remove.addEventListener('click', () => {
     row.remove();
+    refreshLogic();
     update();
   });
   row.append(remove);
-  row.addEventListener('input', update);
+  row.addEventListener('input', (ev) => {
+    if (ev.target.type !== 'checkbox') refreshLogic(false);
+    else refreshLogic();
+    update();
+  });
   $('#logic').append(row);
+  refreshLogic();
   update();
 }
 
-function collectLogic(problems) {
-  const numbers = (v) => v.split(/[\s,]+/).filter(Boolean).map(Number);
-  const steps = [...document.querySelectorAll('#logic .logic-step')].map((row) => {
+/** Steps as written so far, with their arrows (for the map, before checking). */
+function draftSteps() {
+  const numbers = (v) => v.split(/[\s,]+/).filter(Boolean).map(Number).filter(Number.isInteger);
+  return [...document.querySelectorAll('#logic .logic-step')].map((row) => {
     const get = (name) => row.querySelector(`[data-name="${name}"]`)?.value.trim() ?? '';
+    const to = [...row.querySelectorAll('.arrows input:checked')].map((c) => Number(c.value));
+    const arrows = to.length ? { to } : {};
     const kind = row.dataset.kind;
-    if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}) };
-    if (kind === 'cites') return { cites: get('cites'), ...(get('for') ? { for: get('for') } : {}) };
-    if (kind === 'fails') return { fails: `${category?.id}.${current?.id}`, because: numbers(get('because')) };
-    return { so: get('so') };
+    if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}), ...arrows };
+    if (kind === 'cites') return { cites: get('cites'), ...(get('for') ? { for: get('for') } : {}), ...arrows };
+    if (kind === 'fails') return { fails: `${category?.id}.${current?.id}`, because: numbers(get('because')), ...arrows };
+    return { so: get('so'), ...arrows };
   });
+}
+
+/**
+ * Names each step (C1, P2, F3...), offers on each only the arrows its role
+ * allows, and redraws the map. `arrows` false keeps the checkboxes as they
+ * are (while typing).
+ */
+function refreshLogic(arrows = true) {
+  const rows = [...document.querySelectorAll('#logic .logic-step')];
+  const steps = draftSteps();
+  rows.forEach((row, i) => {
+    row.querySelector('.step-name').textContent = `${LETTER[row.dataset.kind]}${i + 1}`;
+    row.classList.toggle('is-selected', selectedStep === String(i + 1));
+    if (!arrows) return;
+    const box = clear(row.querySelector('.arrows'));
+    const allowed = targetsFor(steps, i);
+    const chosen = new Set(steps[i].to ?? []);
+    const word = row.dataset.kind === 'fails' ? 'Breaks' : 'Points to';
+    if (!allowed.length) return box.append(h('p', { class: 'hint' }, row.dataset.kind === 'fails' ? 'Add the claim it breaks.' : 'Nothing to point to yet.'));
+    box.append(h('p', { class: 'hint' }, `${word} (optional):`), h('div', { class: 'row' }, allowed.map((n) => h('label', null,
+      h('input', { type: row.dataset.kind === 'fails' ? 'radio' : 'checkbox', name: `to-${i}`, value: String(n), checked: chosen.has(n) }),
+      ` ${LETTER[rows[n - 1].dataset.kind]}${n}`))));
+  });
+  const box = clear($('#logic-map'));
+  if (steps.length) {
+    box.append(logicMap(steps, {
+      failLabel: current?.label ?? 'Failure',
+      selected: selectedStep,
+      onSelect: (id) => {
+        selectedStep = id;
+        refreshLogic(false);
+        rows[Number(id) - 1]?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      },
+    }));
+  }
+}
+
+function collectLogic(problems) {
+  const steps = draftSteps();
   if (!steps.length) return undefined;
   const long = steps.flatMap((s) => [s.claim, s.so, s.for]).filter((t) => t && t.split(/\s+/).length > 30);
   if (long.length) problems.push('Logic steps are at most 30 words each.');

@@ -29,6 +29,11 @@ selection. Prevalence needs a random sample: Episto projects draw one.
   - `{"cites", "for"}`: the claim rests on another paper (DOI);
   - `{"fails", "because"}`: the flag's failure, shown by which evidence;
   - `{"so"}`: what falls with it.
+  Any step may carry `"to"`: arrows, by step number, from cause to effect.
+  Each line also gives `load_bearing` (the claim the failure breaks) and
+  `notation`, the tree as one line of logic: C claims, P other papers, F
+  the failure, S consequences, E evidence; → supports, ⊣ breaks, ⊢ shows; and
+  after ∴, what falls with the load-bearing claim.
 - **dependencies.csv**: paper-to-paper links: `citing_doi`, `cited_doi`,
   and `via`: `logic` (a flagged claim rests on the cited paper) or
   `references` (a reference list submitted to Episto cites a paper

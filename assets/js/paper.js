@@ -1,5 +1,6 @@
 // One paper and its flags.
 
+import { logicMap } from './logicmap.js';
 import { h, $, clear, severityChip, severityLabel, getParams, status } from './dom.js';
 import { loadPaper, loadTaxonomy, taxonomyLookup, loadIndex } from './data.js';
 
@@ -47,19 +48,6 @@ function decisionLine(f) {
   return `Official notice, recorded by Retraction Watch${f.decided ? ` · ${f.decided}` : ''}`;
 }
 
-/** The logic tree: claim, rests on, fails because, so; each step tied to evidence. */
-function logicTree(steps, label) {
-  const ev = (list) => (list?.length ? ` (evidence ${list.join(', ')})` : '');
-  return h('ol', { class: 'logic' }, steps.map((s) => {
-    if ('claim' in s) return h('li', null, h('strong', null, 'Claims '), s.claim, h('span', { class: 'hint' }, ` · ${s.where}${s.rests_on ? `, resting on${ev(s.rests_on)}` : ''}`));
-    if ('cites' in s) {
-      return h('li', null, h('strong', null, 'Rests on '), h('a', { href: `https://doi.org/${s.cites}`, rel: 'noopener noreferrer' }, `doi:${s.cites}`), s.for ? ` for ${s.for}` : '');
-    }
-    if ('fails' in s) return h('li', null, h('strong', null, 'Fails: '), label, ev(s.because));
-    return h('li', null, h('strong', null, 'So '), s.so);
-  }));
-}
-
 function flagCard(f, lookup) {
   const type = lookup.types.get(f.key);
   const withdrawn = f.status === 'withdrawn';
@@ -73,7 +61,7 @@ function flagCard(f, lookup) {
   const dl = h('dl');
   const row = (term, ...value) => dl.append(h('dt', null, term), h('dd', null, ...value));
   row('Scope', SCOPE[f.scope] ?? f.scope, f.scopeRef ? `: ${f.scopeRef}` : '');
-  if (f.logic?.length) row('Why it lands here', logicTree(f.logic, type?.label ?? f.key));
+  if (f.logic?.length) row('Why it lands here', logicMap(f.logic, { failLabel: type?.label ?? f.key }));
   const links = [...f.evidence.map((u) => [u, u]), ...(f.files ?? []).map((u) => [u, u.split('/').pop()])];
   if (links.length) {
     row('How we know', h('ul', null, links.map(([href, label]) => h('li', null, h('a', { href, rel: 'noopener noreferrer nofollow' }, label)))));
