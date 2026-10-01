@@ -114,6 +114,8 @@ const OPS = {
   away: { label: 'Back on (YYYY-MM-DD, within 6 months)', members: false },
   back: { label: null, members: false },
   stand: { label: null, members: false },
+  rekey: { label: null, members: false },
+  'vouch-rekey': { label: 'Their pseudonym', members: false },
   contact: { label: 'The ticket from the case (paste it)', members: false },
 };
 
@@ -124,6 +126,8 @@ function showOp() {
   $('#op-members-box').hidden = !op.members;
   $('#op-scope-box').hidden = $('#op').value !== 'login';
   $('#op-about-box').hidden = $('#op').value !== 'contact';
+  $('#op-newpass-box').hidden = $('#op').value !== 'rekey';
+  $('#op-key-box').hidden = $('#op').value !== 'vouch-rekey';
 }
 
 async function sealOne() {
@@ -138,6 +142,17 @@ async function sealOne() {
     payload = { op, digest: await digestOf(text) };
   } else if (op === 'back' || op === 'stand') {
     payload = { op };
+  } else if (op === 'rekey') {
+    const pass = $('#op-newpass').value;
+    if (pass.length < MIN_PASSWORD) return status(st, `The new password needs at least ${MIN_PASSWORD} characters.`, 'error');
+    if (pass !== $('#op-newpass2').value) return status(st, 'The two new passwords differ.', 'error');
+    status(st, 'Making your new key. This takes a few seconds.');
+    payload = { op, key: (await deriveKey(me.pseudonym, pass)).publicLine };
+  } else if (op === 'vouch-rekey') {
+    const line = $('#op-key').value.trim().replace(/^key:\s*/, '').replace(/^"|"$/g, '').split(/\s+/).slice(0, 2).join(' ');
+    if (!value) return status(st, 'Give their pseudonym.', 'error');
+    if (!/^ssh-ed25519 [A-Za-z0-9+/]{68}$/.test(line)) return status(st, 'Paste the key line they sent you, starting ssh-ed25519.', 'error');
+    payload = { op, for: value, key: line };
   } else if (op === 'contact') {
     let ticket;
     try {
@@ -161,7 +176,10 @@ async function sealOne() {
   }
   const file = await sealedRequest(me.key, me.pseudonym, payload, cfg.stewardKey);
   out.append(fileBlock(file.path, file.text), howTo([file.path], false));
-  status(st, op === 'authorize' ? 'Add this file to the same pull request as your change.' : 'Ready. Put this file in a pull request of its own.', 'ok');
+  status(st, op === 'authorize' ? 'Add this file to the same pull request as your change.'
+    : op === 'vouch-rekey' ? 'Ready. Send this file to them: they put it in a pull request of their own, from their own GitHub account.'
+      : op === 'rekey' ? 'Ready. Put this file in a pull request of its own. Your new password works 7 days after the steward records it; unlock with the old one until then.'
+        : 'Ready. Put this file in a pull request of its own.', 'ok');
 }
 
 /** A new key for a lost password: the pseudonym stays, the key line changes. */
@@ -175,8 +193,7 @@ async function newKey() {
   if (password !== $('#np-password2').value) return status(st, 'The two passwords differ.', 'error');
   status(st, 'Making your key. This takes a few seconds.');
   const key = await deriveKey(pseudonym, password);
-  const line = `    key: "${key.publicLine}"`;
-  out.append(fileBlock('members.yaml', line, `In your entry (pseudonym: ${pseudonym}), replace the key line with this one.`));
+  out.append(fileBlock('Your new key', key.publicLine, `Send it to your inviter (or a librarian) with your pseudonym, ${pseudonym}.`));
   status(st, 'Done. Your password is not stored anywhere: keep it safe.', 'ok');
 }
 

@@ -90,6 +90,8 @@
       <option value="invite-request">Ask for an extra invitation for a pool</option>
       <option value="away">I'm away (not drawn until I return)</option>
       <option value="back">I'm back</option>
+      <option value="rekey">Change my password</option>
+      <option value="vouch-rekey">Vouch for the new key of someone I invited</option>
       <option value="stand">I stand for librarian (when a draw is open)</option>
       <option value="contact">Someone contacted me about a case I review</option>
     </select>
@@ -101,6 +103,16 @@
   <div id="op-scope-box">
     <label for="op-scope">Project id</label> <span class="hint">Only for a login used for one project; leave empty otherwise.</span>
     <input type="text" id="op-scope" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="op-newpass-box">
+    <label for="op-newpass">New password</label> <span class="hint">At least 16 characters. The new key takes effect 7 days after the steward records it; until then your old password still works.</span>
+    <input type="password" id="op-newpass" autocomplete="new-password" spellcheck="false">
+    <label for="op-newpass2">New password again</label>
+    <input type="password" id="op-newpass2" autocomplete="new-password" spellcheck="false">
+  </div>
+  <div id="op-key-box">
+    <label for="op-key">Their new key line</label> <span class="hint">What they sent you, starting <code>ssh-ed25519</code>. Vouch only after hearing from them directly that they lost their password.</span>
+    <input type="text" id="op-key" autocomplete="off" spellcheck="false">
   </div>
   <div id="op-about-box">
     <label for="op-about">Who contacted you</label> <span class="hint">Their GitHub username or pseudonym, if you know it. Only the steward reads this, and it never tells them.</span>
@@ -117,8 +129,13 @@
 
 <section id="new-password" class="panel stack">
   <h2>Lost your password?</h2>
-  <p>Nobody can recover it, Episto included. Keep your pseudonym and choose a new password: this makes your new key, here in your browser. Your entry then needs the new key line, in place of the old one.</p>
-  <p class="hint">Founders change the line themselves. Other members change it in a pull request that touches only that line; the maintainers approve it once your inviter has confirmed with you, in person or the private way your invitation came, that the change is yours.</p>
+  <p>Nobody can recover it, Episto included. Keep your pseudonym and choose a new password: this makes your new key, here in your browser.</p>
+  <ol>
+    <li>Send the new key to the member who invited you, the private way your invitation came. Founders, and members whose inviter has left, send it to a librarian.</li>
+    <li>They vouch for it on their account page and send you back a file.</li>
+    <li>Put that file in a pull request of its own, opened from your own GitHub account, the one registered to you.</li>
+    <li>The steward tells your GitHub account in the <em>Key changes</em> issue and switches your key 7 days later. A change you did not ask for is stopped by commenting <code>/cancel</code> there.</li>
+  </ol>
   <div>
     <label for="np-pseudonym">Your pseudonym</label>
     <input type="text" id="np-pseudonym" autocomplete="off" spellcheck="false">
