@@ -288,3 +288,7 @@ nav.member-tools a[aria-current="page"] { font-weight: 600; text-decoration: non
 .help > summary { list-style: none; cursor: pointer; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; font-weight: 700; color: var(--muted); background: var(--surface); margin-left: auto; }
 .help > summary::-webkit-details-marker { display: none; }
 .help[open] > summary { margin-bottom: .5rem; }
+.logic-map .lm-calc circle { stroke: var(--accent); }
+.logic-map .lm-parts circle { stroke: var(--critical); stroke-width: 4; fill: var(--critical-bg); }
+.logic-key .parts { color: var(--critical); font-weight: 600; }
+.calc-value.parts { color: var(--critical); font-weight: 600; }

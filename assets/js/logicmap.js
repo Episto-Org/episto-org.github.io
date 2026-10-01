@@ -3,11 +3,13 @@
 // hollow ring; what connects to it orbits on the ring, the rest further out.
 // Arrows run from cause to effect; what falls with the centre is marked.
 
-import { roleOf, nodeName, edgesOf, centerOf, fallsWith, notation, ALLOWED_TO } from '../lib/logic.js';
+import { roleOf, nodeName, edgesOf, centerOf, fallsWith, notation, calcRows, ALLOWED_TO } from '../lib/logic.js';
+import { pretty } from '../lib/mathcheck.js';
 import { h } from './dom.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const ROLE_NAME = { claim: 'Claim', cites: 'Another paper', fails: 'Failure', so: 'Consequence' };
+const ROLE_NAME = { claim: 'Claim', cites: 'Another paper', calc: 'Calculation', fails: 'Failure', so: 'Consequence' };
+const num = (v) => (Number.isInteger(v) ? String(v) : String(Number(v.toPrecision(6))));
 const RING = 118;
 const OUTER = 205;
 
@@ -18,7 +20,13 @@ function svg(tag, attrs = {}, text) {
   return el;
 }
 
-function textOf(step) {
+function textOf(step, row) {
+  if (step.calc !== undefined) {
+    const known = row?.value !== null && row?.value !== undefined;
+    // A line that only sets a number needs no result beside it.
+    if (!known || /=\s*[-+]?[\d.]+\s*$/.test(step.calc)) return pretty(step.calc);
+    return `${pretty(step.calc)} ${/=/.test(step.calc) ? '→' : '='} ${num(row.value)}`;
+  }
   return step.claim ?? step.so ?? (step.cites ? `doi:${step.cites}${step.for ? ` (${step.for})` : ''}` : null);
 }
 
@@ -32,6 +40,7 @@ function textOf(step) {
  */
 export function logicMap(steps, { failLabel = 'Failure', selected = null, onSelect = null, help = true } = {}) {
   const edges = edgesOf(steps);
+  const calc = calcRows(steps).byStep;
   const ids = [...steps.map((_, i) => String(i + 1)), ...new Set(edges.flatMap((e) => [e.from, e.to]).filter((id) => id.startsWith('E')))];
   const center = centerOf(steps, edges) ?? ids[0];
   const falls = fallsWith(steps, edges);
@@ -78,13 +87,13 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
     const role = id.startsWith('E') ? 'evidence' : roleOf(steps[Number(id) - 1]);
     const step = id.startsWith('E') ? null : steps[Number(id) - 1];
     const g = svg('g', {
-      class: `lm-node lm-${role}${id === center ? ' lm-center' : ''}${falls.has(id) ? ' lm-falls' : ''}${id === selected ? ' lm-selected' : ''}`,
+      class: `lm-node lm-${role}${id === center ? ' lm-center' : ''}${falls.has(id) ? ' lm-falls' : ''}${calc.get(Number(id))?.parts ? ' lm-parts' : ''}${id === selected ? ' lm-selected' : ''}`,
       transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})`, tabindex: onSelect ? 0 : undefined, 'data-id': id,
     });
     g.append(
-      svg('title', {}, `${name(id)}: ${id.startsWith('E') ? `evidence ${id.slice(1)}` : role === 'fails' ? failLabel : textOf(step)}`),
+      svg('title', {}, `${name(id)}: ${id.startsWith('E') ? `evidence ${id.slice(1)}` : role === 'fails' ? failLabel : textOf(step, calc.get(Number(id)))}`),
       svg('circle', { r: radius(id) }),
-      svg('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' }, name(id)),
+      svg('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' }, `${name(id)}${calc.get(Number(id))?.parts ? '✗' : ''}`),
     );
     if (onSelect) {
       g.addEventListener('click', () => onSelect(id));
@@ -102,8 +111,14 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
     const role = roleOf(s);
     const id = String(i + 1);
     return h('li', { class: `${id === center ? 'is-center' : ''}${falls.has(id) ? ' is-falling' : ''}` },
-      h('strong', null, `${name(id)} `), `${ROLE_NAME[role]}: `, role === 'fails' ? failLabel : textOf(s),
+      h('strong', null, `${name(id)} `), `${ROLE_NAME[role]}: `, role === 'fails' ? failLabel : textOf(s, calc.get(i + 1)),
       s.where ? h('span', { class: 'hint' }, ` · ${s.where}`) : null,
+      s.why ? h('span', { class: 'hint' }, ` · ${s.why}`) : null,
+      calc.get(i + 1)?.paper !== null && calc.get(i + 1)?.paper !== undefined
+        ? h('span', { class: calc.get(i + 1).parts ? 'parts' : 'hint' }, calc.get(i + 1).parts
+          ? ` ✗ the paper has ${num(calc.get(i + 1).paper)}${s.error ? `: ${s.error}` : ''}`
+          : ` ✓ the paper agrees (${num(calc.get(i + 1).paper)})`)
+        : null,
       id === center ? h('span', { class: 'hint' }, ' · load-bearing') : falls.has(id) ? h('span', { class: 'hint' }, ' · falls with it') : null);
   }));
   return h('div', { class: 'logic-map-box stack' }, help ? logicHelp() : null, map, h('p', { class: 'logic-line' }, h('code', null, notation(steps, edges))), key);
@@ -121,7 +136,8 @@ export function logicHelp() {
       h('ul', null,
         h('li', null, h('strong', null, 'Centre: '), 'the load-bearing claim, the one the flag breaks.'),
         h('li', null, h('strong', null, 'Arrows '), 'run from cause to effect: → supports, ⊣ breaks, ⊢ shows.'),
-        h('li', null, h('strong', null, 'Letters: '), 'C claim, P another paper, F the failure, S what follows, E evidence.'),
+        h('li', null, h('strong', null, 'Letters: '), 'C claim, P another paper, M calculation, F the failure, S what follows, E evidence.'),
+        h('li', null, h('strong', null, '✗ '), 'marks the calculation line where the paper\'s number or formula parts from the calculation: where the mistake happens. The machine checks it.'),
         h('li', null, h('strong', null, 'Dashed red: '), 'falls with the centre.'),
         h('li', null, h('strong', null, 'Select a step '), 'to see what it can connect to.')),
       h('p', null, 'The line under the map says the same in logic: after ∴, what falls.'),

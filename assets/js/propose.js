@@ -1,6 +1,7 @@
 // The flag builder: a form that writes a valid flag file.
 
 import { logicMap, logicHelp, targetsFor } from './logicmap.js';
+import { calcRows } from '../lib/logic.js';
 import { normalizeDoi, doiSlug } from '../lib/doi.js';
 import { h, $, clear, severityChip, download } from './dom.js';
 import { loadTaxonomy } from './data.js';
@@ -145,18 +146,20 @@ function renderEvidence() {
 const STEP_FIELDS = {
   claim: [['claim', 'Claims (your own words)'], ['where', 'Where (page, section, figure or table)'], ['rests_on', 'Resting on evidence (numbers, optional)']],
   cites: [['cites', 'Rests on the paper with DOI'], ['for', 'For what (optional)']],
+  calc: [['calc', 'Formula, e.g. mean = total / n (names from earlier lines; + - * / ^ sqrt round)'], ['why', 'Why this step (optional)'], ['paper', 'The paper\'s number or formula here (optional)'], ['error', 'What went wrong, if it parts (optional)']],
   fails: [['because', 'Fails because of evidence (numbers)']],
   so: [['so', 'So (what falls with it)']],
 };
 
-const ROLE_TITLE = { claim: 'Claims', cites: 'Rests on another paper', fails: 'Fails', so: 'So' };
-const LETTER = { claim: 'C', cites: 'P', fails: 'F', so: 'S' };
+const ROLE_TITLE = { claim: 'Claims', cites: 'Rests on another paper', calc: 'Calculation', fails: 'Fails', so: 'So' };
+const LETTER = { claim: 'C', cites: 'P', calc: 'M', fails: 'F', so: 'S' };
 let selectedStep = null;
 
 function addStep(kind) {
   const row = h('div', { class: 'logic-step stack', 'data-kind': kind },
     h('p', null, h('strong', { class: 'step-name' }, ''), ` ${ROLE_TITLE[kind]}`),
     ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))),
+    kind === 'calc' ? h('p', { class: 'calc-value hint', 'aria-live': 'polite' }) : null,
     h('div', { class: 'arrows stack' }));
   const remove = h('button', { type: 'button' }, 'Remove');
   remove.addEventListener('click', () => {
@@ -185,6 +188,7 @@ function draftSteps() {
     const kind = row.dataset.kind;
     if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}), ...arrows };
     if (kind === 'cites') return { cites: get('cites'), ...(get('for') ? { for: get('for') } : {}), ...arrows };
+    if (kind === 'calc') return { calc: get('calc'), ...(get('why') ? { why: get('why') } : {}), ...(get('paper') ? { paper: get('paper') } : {}), ...(get('error') ? { error: get('error') } : {}), ...arrows };
     if (kind === 'fails') return { fails: `${category?.id}.${current?.id}`, because: numbers(get('because')), ...arrows };
     return { so: get('so'), ...arrows };
   });
@@ -198,6 +202,19 @@ function draftSteps() {
 function refreshLogic(arrows = true) {
   const rows = [...document.querySelectorAll('#logic .logic-step')];
   const steps = draftSteps();
+  // Each calculation line's value, computed as it is written, and where the
+  // paper's version parts from it.
+  const calc = calcRows(steps);
+  rows.forEach((row, i) => {
+    const out = row.querySelector('.calc-value');
+    if (!out) return;
+    const r = calc.byStep.get(i + 1);
+    const problem = calc.problems.find((p) => p.startsWith(`logic ${i + 1}:`));
+    out.classList.toggle('parts', Boolean(r?.parts));
+    out.textContent = problem ? problem.replace(/^logic \d+: /, '')
+      : r?.value === null || r?.value === undefined ? ''
+        : `= ${Number(r.value.toPrecision(6))}${r.paper === null ? '' : r.parts ? `  ✗ the paper has ${Number(r.paper.toPrecision(6))}: this is where it parts` : '  ✓ the paper agrees'}`;
+  });
   rows.forEach((row, i) => {
     row.querySelector('.step-name').textContent = `${LETTER[row.dataset.kind]}${i + 1}`;
     row.classList.toggle('is-selected', selectedStep === String(i + 1));

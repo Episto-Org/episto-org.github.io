@@ -5,13 +5,19 @@
 //   supports (→)  a claim, another paper or an evidence item holds up a claim;
 //                 a claim leads to a consequence
 //   breaks   (⊣)  the failure breaks the claim it lands on
+//   shows    (⊢)  evidence, or the calculation line where the paper's version
+//                 parts from the calculation, shows the failure
+// Calculation steps (M) are linked by the names their formulas use.
 // The claim the failure breaks is load-bearing: everything downstream of it
 // along "supports" falls with it.
 
-export const ROLE_LETTER = { claim: 'C', cites: 'P', fails: 'F', so: 'S' };
+import { checkDerivation } from './mathcheck.js';
+
+export const ROLE_LETTER = { claim: 'C', cites: 'P', calc: 'M', fails: 'F', so: 'S' };
 
 /** What each role may point to (the roles of the targets). */
 export const ALLOWED_TO = {
+  calc: ['calc', 'claim'],
   claim: ['claim', 'so'],
   cites: ['claim'],
   fails: ['claim'],
@@ -24,6 +30,15 @@ export function roleOf(step) {
 
 export function nodeName(steps, i) {
   return `${ROLE_LETTER[roleOf(steps[i])]}${i + 1}`;
+}
+
+/** The calculation steps checked together: rows by step number. */
+export function calcRows(steps) {
+  const at = steps.map((s, i) => (roleOf(s) === 'calc' ? i : -1)).filter((i) => i >= 0);
+  if (!at.length) return { byStep: new Map(), problems: [], first: null };
+  const { rows, problems, first } = checkDerivation(at.map((i) => ({ expr: steps[i].calc, paper: steps[i].paper })));
+  const byStep = new Map(at.map((i, k) => [i + 1, { ...rows[k], uses: rows[k].uses.map((u) => at[u - 1] + 1) }]));
+  return { byStep, problems: problems.map((p) => p.replace(/calculation line (\d+)/, (_, k) => `logic ${at[Number(k) - 1] + 1}`)), first: first ? at[first - 1] + 1 : null };
 }
 
 /**
@@ -52,6 +67,14 @@ export function edgesOf(steps) {
     }
     for (const t of to ?? []) edges.push({ from: id, to: String(t), kind: role === 'fails' ? 'breaks' : 'supports' });
   });
+  // Calculations: each line from the lines whose names it uses; the lines
+  // where the paper parts from the calculation show the failure.
+  const { byStep } = calcRows(steps);
+  const failSteps = steps.map((s, i) => (roleOf(s) === 'fails' ? String(i + 1) : null)).filter(Boolean);
+  for (const [n, row] of byStep) {
+    for (const u of row.uses) edges.push({ from: String(u), to: String(n), kind: 'supports' });
+    if (row.parts) for (const f of failSteps) edges.push({ from: String(n), to: f, kind: 'shows' });
+  }
   const center = centerOf(steps, edges);
   steps.forEach((s, i) => {
     const id = String(i + 1);
@@ -100,7 +123,8 @@ export function acyclic(steps, edges = edgesOf(steps)) {
  * "E2 → C1; P2 → C1; E1 ⊢ F3; F3 ⊣ C1; C1 → S4 ∴ ¬C1 ⇒ ¬S4"
  */
 export function notation(steps, edges = edgesOf(steps)) {
-  const name = (id) => (id.startsWith('E') ? id : nodeName(steps, Number(id) - 1));
+  const { byStep } = calcRows(steps);
+  const name = (id) => (id.startsWith('E') ? id : `${nodeName(steps, Number(id) - 1)}${byStep.get(Number(id))?.parts ? '✗' : ''}`);
   const sym = { supports: '→', breaks: '⊣', shows: '⊢' };
   const parts = edges.map((e) => `${name(e.from)} ${sym[e.kind]} ${name(e.to)}`);
   const center = centerOf(steps, edges);
