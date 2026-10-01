@@ -111,6 +111,28 @@
   <div id="request-out" class="stack"></div>
 </section>
 
+<section id="new-password" class="panel stack">
+  <h2>Lost your password?</h2>
+  <p>Nobody can recover it, Episto included. Keep your pseudonym and choose a new password: this makes your new key, here in your browser. Your entry then needs the new key line, in place of the old one.</p>
+  <p class="hint">Founders change the line themselves. Other members change it in a pull request that touches only that line; the maintainers approve it once your inviter has confirmed with you, in person or the private way your invitation came, that the change is yours.</p>
+  <div>
+    <label for="np-pseudonym">Your pseudonym</label>
+    <input type="text" id="np-pseudonym" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label for="np-password">New password</label> <span class="hint">At least 16 characters. Write it down this time.</span>
+    <input type="password" id="np-password" autocomplete="new-password" spellcheck="false">
+    <div class="row"><button type="button" id="np-suggest">Suggest a password</button> <code id="np-suggested"></code></div>
+  </div>
+  <div>
+    <label for="np-password2">New password again</label>
+    <input type="password" id="np-password2" autocomplete="new-password" spellcheck="false">
+  </div>
+  <div class="row"><button type="button" id="np-make">Make my new key</button></div>
+  <p id="np-status" aria-live="polite"></p>
+  <div id="np-out" class="stack"></div>
+</section>
+
 </div></main>
 <footer class="site"><div class="wrap">
 <p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>

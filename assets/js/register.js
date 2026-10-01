@@ -3,7 +3,7 @@
 
 import { h, $, clear, status } from './dom.js';
 import { parseEntry } from './pools.js';
-import { deriveKey, sealedRequest, digestOf } from '../lib/seals.js';
+import { deriveKey, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
 import { readBundle } from './bundle.js';
 
 let cfg;
@@ -137,12 +137,35 @@ async function sealOne() {
   status(st, op === 'authorize' ? 'Add this file to the same pull request as your change.' : 'Ready. Put this file in a pull request of its own.', 'ok');
 }
 
+/** A new key for a lost password: the pseudonym stays, the key line changes. */
+async function newKey() {
+  const st = $('#np-status');
+  const out = clear($('#np-out'));
+  const pseudonym = $('#np-pseudonym').value.trim();
+  const password = $('#np-password').value;
+  if (!new RegExp(cfg.pseudonymPattern).test(pseudonym)) return status(st, 'Give your pseudonym exactly as in the members list.', 'error');
+  if (password.length < MIN_PASSWORD) return status(st, `The password needs at least ${MIN_PASSWORD} characters.`, 'error');
+  if (password !== $('#np-password2').value) return status(st, 'The two passwords differ.', 'error');
+  status(st, 'Making your key. This takes a few seconds.');
+  const key = await deriveKey(pseudonym, password);
+  const line = `    key: "${key.publicLine}"`;
+  out.append(fileBlock('members.yaml', line, `In your entry (pseudonym: ${pseudonym}), replace the key line with this one.`));
+  status(st, 'Done. Your password is not stored anywhere: keep it safe.', 'ok');
+}
+
 export function initRegister(config) {
   cfg = config;
   const fail = (el) => (e) => status($(el), `That did not work: ${e.message}.`, 'error');
   $('#unlock').addEventListener('click', () => unlock().catch(fail('#unlock-status')));
   $('#prepare-invite').addEventListener('click', () => prepareInvite().catch(fail('#invite-status')));
   $('#seal-request').addEventListener('click', () => sealOne().catch(fail('#request-status')));
+  $('#np-make').addEventListener('click', () => newKey().catch(fail('#np-status')));
+  $('#np-suggest').addEventListener('click', () => {
+    const p = suggestPassword();
+    $('#np-password').value = p;
+    $('#np-password2').value = p;
+    $('#np-suggested').textContent = p;
+  });
   $('#op').addEventListener('change', showOp);
   showOp();
 }
