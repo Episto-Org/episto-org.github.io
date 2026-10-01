@@ -5,6 +5,7 @@
 
 import { roleOf, nodeName, edgesOf, centerOf, fallsWith, notation, calcRows, ALLOWED_TO } from '../lib/logic.js';
 import { pretty } from '../lib/mathcheck.js';
+import { recognise } from '../lib/expressions.js';
 import { h } from './dom.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -113,6 +114,7 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
     return h('li', { class: `${id === center ? 'is-center' : ''}${falls.has(id) ? ' is-falling' : ''}` },
       h('strong', null, `${name(id)} `), `${ROLE_NAME[role]}: `, role === 'fails' ? failLabel : textOf(s, calc.get(i + 1)),
       s.where ? h('span', { class: 'hint' }, ` · ${s.where}`) : null,
+      s.calc && recognise(s.calc) ? h('span', { class: 'hint' }, ` · ≡ ${recognise(s.calc).label}`) : null,
       s.why ? h('span', { class: 'hint' }, ` · ${s.why}`) : null,
       calc.get(i + 1)?.paper !== null && calc.get(i + 1)?.paper !== undefined
         ? h('span', { class: calc.get(i + 1).parts ? 'parts' : 'hint' }, calc.get(i + 1).parts

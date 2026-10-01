@@ -292,3 +292,6 @@ nav.member-tools a[aria-current="page"] { font-weight: 600; text-decoration: non
 .logic-map .lm-parts circle { stroke: var(--critical); stroke-width: 4; fill: var(--critical-bg); }
 .logic-key .parts { color: var(--critical); font-weight: 600; }
 .calc-value.parts { color: var(--critical); font-weight: 600; }
+.calc-groups .calc-icon { min-width: 2.4rem; font-weight: 700; }
+.calc-groups [aria-selected="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.calc-items button { font-weight: 500; }

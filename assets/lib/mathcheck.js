@@ -10,7 +10,79 @@
 export const MATH_MAX_LINES = 40;
 export const MATH_MAX_CHARS = 160;
 
+// Distributions, for re-computing reported p-values.
+function lgamma(x) {
+  const g = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+  let y = x;
+  const t = x + 5.5 - (x + 0.5) * Math.log(x + 5.5);
+  let s = 1.000000000190015;
+  for (const c of g) s += c / ++y;
+  return -t + Math.log((2.5066282746310005 * s) / x);
+}
+/** Regularised incomplete beta I_x(a, b) (continued fraction). */
+function ibeta(x, a, b) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  const cf = (xx, aa, bb) => {
+    let c = 1;
+    let d = 1 - ((aa + bb) * xx) / (aa + 1);
+    d = 1 / (Math.abs(d) < 1e-300 ? 1e-300 : d);
+    let f = d;
+    for (let m = 1; m <= 300; m++) {
+      const m2 = 2 * m;
+      let num = (m * (bb - m) * xx) / ((aa + m2 - 1) * (aa + m2));
+      d = 1 + num * d; d = 1 / (Math.abs(d) < 1e-300 ? 1e-300 : d);
+      c = 1 + num / c; c = Math.abs(c) < 1e-300 ? 1e-300 : c;
+      f *= d * c;
+      num = (-(aa + m) * (aa + bb + m) * xx) / ((aa + m2) * (aa + m2 + 1));
+      d = 1 + num * d; d = 1 / (Math.abs(d) < 1e-300 ? 1e-300 : d);
+      c = 1 + num / c; c = Math.abs(c) < 1e-300 ? 1e-300 : c;
+      const del = d * c;
+      f *= del;
+      if (Math.abs(del - 1) < 1e-12) break;
+    }
+    return f;
+  };
+  return x < (a + 1) / (a + b + 2) ? (front * cf(x, a, b)) / a : 1 - (front * cf(1 - x, b, a)) / b;
+}
+/** Regularised lower incomplete gamma P(a, x). */
+function igamma(a, x) {
+  if (x <= 0) return 0;
+  if (x < a + 1) {
+    let sum = 1 / a;
+    let del = sum;
+    for (let n = 1; n < 500; n++) {
+      del *= x / (a + n);
+      sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-14) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+  }
+  let b = x + 1 - a;
+  let c = 1e300;
+  let d = 1 / b;
+  let h = d;
+  for (let i = 1; i < 500; i++) {
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b; d = 1 / (Math.abs(d) < 1e-300 ? 1e-300 : d);
+    c = b + an / c; c = Math.abs(c) < 1e-300 ? 1e-300 : c;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-14) break;
+  }
+  return 1 - Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+}
+// erf(x) = P(1/2, x²), so Φ(z) = (1 + sign(z) · P(1/2, z²/2)) / 2.
+const pnorm = (z) => 0.5 * (1 + Math.sign(z) * igamma(0.5, (z * z) / 2));
+
 const FUNCTIONS = {
+  pnorm: [1, 1, pnorm], // P(Z ≤ z), standard normal
+  p2: [1, 1, (z) => 2 * (1 - pnorm(Math.abs(z)))], // two-sided p from z
+  pt2: [2, 2, (t, df) => ibeta(df / (df + t * t), df / 2, 0.5)], // two-sided p from t with df
+  pchisq: [2, 2, (x, df) => 1 - igamma(df / 2, x / 2)], // upper-tail p from chi-square with df
+  pf: [3, 3, (f, d1, d2) => ibeta(d2 / (d2 + d1 * f), d2 / 2, d1 / 2)], // upper-tail p from F(d1, d2)
   sqrt: [1, 1, Math.sqrt],
   abs: [1, 1, Math.abs],
   exp: [1, 1, Math.exp],
@@ -191,6 +263,33 @@ export function checkDerivation(lines) {
   });
   const first = rows.findIndex((r) => r.parts);
   return { rows, problems, first: first < 0 ? null : first + 1 };
+}
+
+/**
+ * The shape of a formula: names replaced by a, b, c... in order of first
+ * use, numbers and functions kept. "se = s / sqrt(N)" and "sd / sqrt(n)"
+ * share the shape "a / sqrt(b)". Null when the formula cannot be read.
+ */
+export function shape(text) {
+  try {
+    const uses = new Set();
+    const tree = parse(tokenize(split(text).formula), uses);
+    const names = new Map();
+    const walk = (n) => {
+      switch (n[0]) {
+        case 'num': return String(n[1]);
+        case 'name':
+          if (!names.has(n[1])) names.set(n[1], String.fromCharCode(97 + names.size));
+          return names.get(n[1]);
+        case 'neg': return `(-${walk(n[1])})`;
+        case 'call': return `${n[1]}(${n[2].map(walk).join(',')})`;
+        default: return `(${walk(n[1])}${n[0]}${walk(n[2])})`;
+      }
+    };
+    return walk(tree);
+  } catch {
+    return null;
+  }
 }
 
 /** A formula as it reads: × for *, √ for sqrt, superscript-free but tidy. */

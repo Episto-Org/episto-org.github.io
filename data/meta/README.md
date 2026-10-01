@@ -30,7 +30,8 @@ selection. Prevalence needs a random sample: Episto projects draw one.
   - `{"fails", "because"}`: the flag's failure, shown by which evidence;
   - `{"so"}`: what falls with it.
   Any step may carry `"to"`: arrows, by step number, from cause to effect.
-  Each line also gives `load_bearing` (the claim the failure breaks) and
+  Each line also gives `expressions` (which known formula each calculation
+  step is, by id from lib/expressions.js), `load_bearing` (the claim the failure breaks) and
   `notation`, the tree as one line of logic: C claims, P other papers, F
   the failure, S consequences, E evidence; → supports, ⊣ breaks, ⊢ shows; and
   after ∴, what falls with the load-bearing claim.

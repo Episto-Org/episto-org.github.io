@@ -2,6 +2,7 @@
 
 import { logicMap, logicHelp, targetsFor } from './logicmap.js';
 import { calcRows } from '../lib/logic.js';
+import { EXPRESSION_GROUPS, GROUP_FOR_CATEGORY, recognise } from '../lib/expressions.js';
 import { normalizeDoi, doiSlug } from '../lib/doi.js';
 import { h, $, clear, severityChip, download } from './dom.js';
 import { loadTaxonomy } from './data.js';
@@ -154,13 +155,51 @@ const STEP_FIELDS = {
 const ROLE_TITLE = { claim: 'Claims', cites: 'Rests on another paper', calc: 'Calculation', fails: 'Fails', so: 'So' };
 const LETTER = { claim: 'C', cites: 'P', calc: 'M', fails: 'F', so: 'S' };
 let selectedStep = null;
+// The expression menu stays on the group last chosen; it starts on the
+// group that fits the flag's category.
+let lastGroup = null;
+
+/** The menu of known expressions in a calculation step: groups, then formulas. */
+function calcMenu(row) {
+  const box = h('div', { class: 'calc-menu stack' });
+  const draw = () => {
+    clear(box);
+    const groupId = lastGroup ?? GROUP_FOR_CATEGORY[category?.id] ?? 'arithmetic';
+    const group = EXPRESSION_GROUPS.find((g) => g.id === groupId) ?? EXPRESSION_GROUPS[0];
+    const tabs = h('div', { class: 'row calc-groups', role: 'tablist' }, EXPRESSION_GROUPS.map((g) => {
+      const b = h('button', { type: 'button', role: 'tab', 'aria-selected': String(g.id === group.id), title: g.label, class: 'calc-icon' }, g.icon);
+      b.addEventListener('click', () => {
+        lastGroup = g.id;
+        draw();
+      });
+      return b;
+    }));
+    const items = h('div', { class: 'row calc-items' }, group.items.map((item) => {
+      const b = h('button', { type: 'button', title: item.how }, item.label);
+      b.addEventListener('click', () => {
+        lastGroup = group.id;
+        row.querySelector('[data-name="calc"]').value = item.expr;
+        const why = row.querySelector('[data-name="why"]');
+        if (!why.value.trim()) why.value = item.how.split(/(?<=\.)\s/)[0].slice(0, 140);
+        refreshLogic();
+        update();
+      });
+      return b;
+    }));
+    box.append(h('p', { class: 'hint' }, `${group.icon} ${group.label}: choose a formula, then rename its values to the paper's.`), tabs, items);
+  };
+  draw();
+  return box;
+}
 
 function addStep(kind) {
   const row = h('div', { class: 'logic-step stack', 'data-kind': kind },
     h('p', null, h('strong', { class: 'step-name' }, ''), ` ${ROLE_TITLE[kind]}`),
     ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))),
     kind === 'calc' ? h('p', { class: 'calc-value hint', 'aria-live': 'polite' }) : null,
+    kind === 'calc' ? h('p', { class: 'calc-known hint' }) : null,
     h('div', { class: 'arrows stack' }));
+  if (kind === 'calc') row.insertBefore(calcMenu(row), row.children[1]);
   const remove = h('button', { type: 'button' }, 'Remove');
   remove.addEventListener('click', () => {
     row.remove();
@@ -211,6 +250,9 @@ function refreshLogic(arrows = true) {
     const r = calc.byStep.get(i + 1);
     const problem = calc.problems.find((p) => p.startsWith(`logic ${i + 1}:`));
     out.classList.toggle('parts', Boolean(r?.parts));
+    // Say how: a formula in a known shape is named and explained.
+    const known = recognise(steps[i].calc ?? '');
+    row.querySelector('.calc-known').textContent = known ? `≡ ${known.icon} ${known.label}: ${known.how}` : '';
     out.textContent = problem ? problem.replace(/^logic \d+: /, '')
       : r?.value === null || r?.value === undefined ? ''
         : `= ${Number(r.value.toPrecision(6))}${r.paper === null ? '' : r.parts ? `  ✗ the paper has ${Number(r.paper.toPrecision(6))}: this is where it parts` : '  ✓ the paper agrees'}`;
