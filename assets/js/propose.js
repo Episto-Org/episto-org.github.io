@@ -140,6 +140,46 @@ function renderEvidence() {
   });
 }
 
+// The optional logic tree: one row per step.
+const STEP_FIELDS = {
+  claim: [['claim', 'Claims (your own words)'], ['where', 'Where (page, section, figure or table)'], ['rests_on', 'Resting on evidence (numbers, optional)']],
+  cites: [['cites', 'Rests on the paper with DOI'], ['for', 'For what (optional)']],
+  fails: [['because', 'Fails because of evidence (numbers)']],
+  so: [['so', 'So (what falls with it)']],
+};
+
+function addStep(kind) {
+  const row = h('div', { class: 'logic-step stack', 'data-kind': kind },
+    h('p', null, h('strong', null, { claim: 'Claims', cites: 'Rests on', fails: 'Fails', so: 'So' }[kind])),
+    ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))));
+  const remove = h('button', { type: 'button' }, 'Remove');
+  remove.addEventListener('click', () => {
+    row.remove();
+    update();
+  });
+  row.append(remove);
+  row.addEventListener('input', update);
+  $('#logic').append(row);
+  update();
+}
+
+function collectLogic(problems) {
+  const numbers = (v) => v.split(/[\s,]+/).filter(Boolean).map(Number);
+  const steps = [...document.querySelectorAll('#logic .logic-step')].map((row) => {
+    const get = (name) => row.querySelector(`[data-name="${name}"]`)?.value.trim() ?? '';
+    const kind = row.dataset.kind;
+    if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}) };
+    if (kind === 'cites') return { cites: get('cites'), ...(get('for') ? { for: get('for') } : {}) };
+    if (kind === 'fails') return { fails: `${category?.id}.${current?.id}`, because: numbers(get('because')) };
+    return { so: get('so') };
+  });
+  if (!steps.length) return undefined;
+  const long = steps.flatMap((s) => [s.claim, s.so, s.for]).filter((t) => t && t.split(/\s+/).length > 30);
+  if (long.length) problems.push('Logic steps are at most 30 words each.');
+  if (!steps.some((s) => 'claim' in s) || !steps.some((s) => 'fails' in s)) problems.push('A logic tree needs at least a claim and the step where it fails.');
+  return steps;
+}
+
 function collect() {
   const problems = [];
   const doi = normalizeDoi($('#doi').value);
@@ -202,6 +242,7 @@ function collect() {
     scope: scopeKind === 'whole-paper' ? { kind: scopeKind } : { kind: scopeKind, ref: scopeRef },
     summary,
     evidence,
+    logic: collectLogic(problems),
     proposer: pseudonym ?? undefined,
     status: 'proposed',
     request: pseudonym ? { trigger: 'proposal', by: pseudonym } : { trigger: 'proposal' },
@@ -258,6 +299,7 @@ async function init() {
   $('#lookup').addEventListener('click', lookup);
   $('#builder').addEventListener('input', update);
   $('#builder').addEventListener('change', update);
+  for (const b of document.querySelectorAll('[data-step]')) b.addEventListener('click', () => addStep(b.dataset.step));
   $('#copy-yaml').addEventListener('click', () => navigator.clipboard.writeText($('#output').dataset.yaml));
   $('#download-yaml').addEventListener('click', () => download($('#output').dataset.path.split('/').pop(), $('#output').dataset.yaml, 'text/yaml'));
   update();
