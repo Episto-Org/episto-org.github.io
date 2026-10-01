@@ -115,6 +115,28 @@ export async function sealedRequest(key, member, payload, stewardPem) {
   return { path: `register/requests/${randomHex(8)}.sealed`, text: JSON.stringify(await seal(body, stewardPem)) + '\n' };
 }
 
+const ADJECTIVES = ('amber azure brisk calm cedar civic clear coral crisp dawn deep dry dusky early even fair fern fleet frost gentle gilded glad grand green hazel hollow ivory jade keen kind late level light lime linen lucid lunar maple mellow mild misty modest moss noble north oaken ochre olive pale pearl pine plain plum polar quiet rapid rare ready red river robust rose round royal ruby russet rustic sage sandy scarlet sharp silent silver slate sober solar south spare spruce steady still stone sunny swift tall tawny tidal topaz true umber vast velvet violet warm west wild willow windy winter woven young').split(' ');
+const NOUNS = ('acorn alder anchor arch aspen badger basin beacon birch bison brook canyon cedar cliff comet compass cove crane creek delta dune eagle echo elm ember falcon fern field finch fjord forest fox glacier glade grove gull harbor hare hawk heron hill island ivy jay juniper kestrel lake lantern lark ledge lichen lynx maple marsh meadow mesa mink moor moth newt oak orchid osprey otter owl pebble pine plover pond prairie quail quarry rain raven reed ridge river robin sable sage shore sparrow spring spruce stone stork summit swan thrush tide trail tundra vale valley walnut willow wren yarrow').split(' ');
+
+const DIGITS = Array.from({ length: 900 }, (_, i) => i);
+
+function pick(list) {
+  const limit = 65536 - (65536 % list.length);
+  for (;;) {
+    const v = globalThis.crypto.getRandomValues(new Uint16Array(1))[0];
+    if (v < limit) return list[v % list.length];
+  }
+}
+
+/**
+ * A random pseudonym, such as "misty-heron-417": nothing in it comes from the
+ * member, so it cannot point back to them. About 10 million combinations.
+ */
+export function suggestPseudonym() {
+  const n = 100 + pick(DIGITS);
+  return `${pick(ADJECTIVES)}-${pick(NOUNS)}-${n}`;
+}
+
 /** A strong random password: 20 characters in 4 groups, about 100 bits. */
 export function suggestPassword() {
   const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';

@@ -3,7 +3,7 @@
 
 import { h, $, clear, download, status } from './dom.js';
 import { loadPoolsConfig, explainer, picker, entryYaml, today, poolLabel } from './pools.js';
-import { deriveKey, sealedRequest, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
+import { deriveKey, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
 import { writeBundle } from './bundle.js';
 
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -47,7 +47,7 @@ async function write(ev) {
     pseudonym,
     ...(cfg.sealedRegister ? {} : { forge }),
     key: key.publicLine,
-    invited_by: inviter,
+    invited_by: inviter === 'founder' ? null : inviter,
     pools: Object.fromEntries([...selected].map((p) => [p, day])),
     joined: day,
     status: 'active',
@@ -71,6 +71,10 @@ async function main() {
   $('#explainer').append(explainer(cfg));
   $('#picker').append(picker(cfg, selected, () => {}));
   $('#join-form').addEventListener('submit', (ev) => write(ev).catch((e) => status($('#join-problems'), `Sealing failed: ${e.message}. Use a current browser.`, 'error')));
+  $('#pseudonym').value = suggestPseudonym();
+  $('#another').addEventListener('click', () => {
+    $('#pseudonym').value = suggestPseudonym();
+  });
   $('#suggest').addEventListener('click', () => {
     const p = suggestPassword();
     $('#password').value = p;
