@@ -81,16 +81,21 @@
   <li class="panel">
     <div id="logic-help"></div>
     <h2>Why it lands here <span class="hint">(optional)</span></h2>
-    <p class="hint">A short chain from the paper's claim to the failure, shown with the flag. Use your own words, never the paper's, at most 30 words a step, and say where each claim is. Steps refer to your evidence by number. Arrows run from cause to effect: choose, on each step, what it points to. The claim the failure breaks is load-bearing; it goes to the centre, and what depends on it falls with it.</p>
+    <p class="hint">Sketch the argument as a small map: what the paper claims, what that rests on, where it breaks, and what falls with it. Tap a step on the map to build from it; the arrows are set for you. A few words a step, in your own words.</p>
+    <div id="logic-start"><button type="button" class="primary" data-step="claim">Start with the paper's claim</button></div>
     <div id="logic-map"></div>
+    <div id="logic-actions" class="stack" aria-live="polite"></div>
     <div id="logic" class="stack"></div>
-    <div class="row">
-      <button type="button" data-step="claim">+ Claims</button>
-      <button type="button" data-step="cites">+ Rests on another paper</button>
-      <button type="button" data-step="calc">+ Calculation</button>
-      <button type="button" data-step="fails">+ Fails because</button>
-      <button type="button" data-step="so">+ So</button>
-    </div>
+    <details class="more-steps">
+      <summary>Add a step without the map</summary>
+      <div class="row">
+        <button type="button" data-step="claim">The paper claims</button>
+        <button type="button" data-step="cites">It rests on another paper</button>
+        <button type="button" data-step="calc">A number</button>
+        <button type="button" data-step="fails">It breaks here</button>
+        <button type="button" data-step="so">What follows</button>
+      </div>
+    </details>
   </li>
 
   <li class="panel">

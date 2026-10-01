@@ -143,22 +143,21 @@ function renderEvidence() {
   });
 }
 
-// The optional logic tree: one row per step.
+// The optional logic tree: one row per step, built mostly from the map.
 const STEP_FIELDS = {
-  claim: [['claim', 'Claims (your own words)'], ['where', 'Where (page, section, figure or table)'], ['rests_on', 'Resting on evidence (numbers, optional)']],
-  cites: [['cites', 'Rests on the paper with DOI'], ['for', 'For what (optional)']],
-  calc: [['calc', 'Formula, e.g. mean = total / n (names from earlier lines; + - * / ^ sqrt round)'], ['why', 'Why this step (optional)'], ['paper', 'The paper\'s number or formula here (optional)'], ['error', 'What went wrong, if it parts (optional)']],
-  fails: [['because', 'Fails because of evidence (numbers)']],
-  so: [['so', 'So (what falls with it)']],
+  claim: [['claim', 'What does the paper claim? (your own words)'], ['where', 'Where in the paper? (page, section, figure or table)'], ['rests_on', 'Which of your evidence supports it? (numbers, optional)']],
+  cites: [['cites', 'The other paper\'s DOI'], ['for', 'What it is used for (optional)']],
+  calc: [['calc', 'The number, as a formula, e.g. mean = total / n'], ['why', 'Why this number (optional)'], ['paper', 'The paper\'s own number or formula here (optional)'], ['error', 'What went wrong, if it differs (optional)']],
+  fails: [['because', 'Which of your evidence shows it? (numbers)']],
+  so: [['so', 'What follows from it?']],
 };
 
-const ROLE_TITLE = { claim: 'Claims', cites: 'Rests on another paper', calc: 'Calculation', fails: 'Fails', so: 'So' };
+const ROLE_TITLE = { claim: 'The paper claims', cites: 'It rests on another paper', calc: 'A number', fails: 'It breaks here', so: 'What follows' };
 const LETTER = { claim: 'C', cites: 'P', calc: 'M', fails: 'F', so: 'S' };
 let selectedStep = null;
 // The expression menu stays on the group last chosen; it starts on the
 // group that fits the flag's category.
 let lastGroup = null;
-
 /** The menu of known expressions in a calculation step: groups, then formulas. */
 function calcMenu(row) {
   const box = h('div', { class: 'calc-menu stack' });
@@ -192,29 +191,125 @@ function calcMenu(row) {
   return box;
 }
 
-function addStep(kind) {
+const logicRows = () => [...document.querySelectorAll('#logic .logic-step')];
+
+/**
+ * Keeps every arrow pointing at the same step when steps are inserted or
+ * removed: `map` turns an old step number into its new one (or null).
+ */
+function carryArrows(rows, prior, map) {
+  rows.forEach((row, i) => {
+    if (!row.isConnected) return;
+    row.dataset.preset = JSON.stringify((prior[i]?.to ?? []).map(map).filter(Boolean));
+    clear(row.querySelector('.arrows'));
+  });
+}
+
+/**
+ * Adds a step. `to`: steps it points to; `from`: a step that should point
+ * to it; `before`: insert before that step (a number a formula uses must
+ * come first). Numbers are as they are before the step is added.
+ */
+function addStep(kind, { to = [], from = null, before = null } = {}) {
+  const rows = logicRows();
+  const prior = draftSteps();
+  const at = before ? before - 1 : rows.length;
+  const map = (n) => (n - 1 >= at ? n + 1 : n);
   const row = h('div', { class: 'logic-step stack', 'data-kind': kind },
     h('p', null, h('strong', { class: 'step-name' }, ''), ` ${ROLE_TITLE[kind]}`),
     ...STEP_FIELDS[kind].map(([name, label]) => h('label', null, label, h('input', { type: 'text', 'data-name': name, autocomplete: 'off' }))),
     kind === 'calc' ? h('p', { class: 'calc-value hint', 'aria-live': 'polite' }) : null,
     kind === 'calc' ? h('p', { class: 'calc-known hint' }) : null,
-    h('div', { class: 'arrows stack' }));
+    h('details', { class: 'arrows-box' }, h('summary', null, 'Arrows (set for you)'), h('div', { class: 'arrows stack' })));
   if (kind === 'calc') row.insertBefore(calcMenu(row), row.children[1]);
   const remove = h('button', { type: 'button' }, 'Remove');
-  remove.addEventListener('click', () => {
-    row.remove();
-    refreshLogic();
-    update();
-  });
+  remove.addEventListener('click', () => removeStep(row));
   row.append(remove);
   row.addEventListener('input', (ev) => {
-    if (ev.target.type !== 'checkbox') refreshLogic(false);
+    if (ev.target.type !== 'checkbox' && ev.target.type !== 'radio') refreshLogic(false);
     else refreshLogic();
     update();
   });
-  $('#logic').append(row);
+  carryArrows(rows, prior, map);
+  row.dataset.preset = JSON.stringify(to.map(map));
+  if (before) $('#logic').insertBefore(row, rows[at]);
+  else $('#logic').append(row);
+  if (from) {
+    const source = rows[from - 1];
+    source.dataset.preset = JSON.stringify([...JSON.parse(source.dataset.preset ?? '[]'), at + 1]);
+  }
+  selectedStep = String(at + 1);
   refreshLogic();
   update();
+  row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  row.querySelector('input[type="text"]')?.focus({ preventScroll: true });
+}
+
+function removeStep(row) {
+  const rows = logicRows();
+  const prior = draftSteps();
+  const k = rows.indexOf(row) + 1;
+  row.remove();
+  carryArrows(rows, prior, (n) => (n === k ? null : n > k ? n - 1 : n));
+  if (selectedStep === String(k)) selectedStep = null;
+  refreshLogic();
+  update();
+}
+
+/** What can be added from the step chosen on the map: only what fits there. */
+function renderActions(steps) {
+  const box = clear($('#logic-actions'));
+  if (!selectedStep) return;
+  const btn = (label, fn, cls) => {
+    const b = h('button', { type: 'button', class: cls }, label);
+    b.addEventListener('click', fn);
+    return b;
+  };
+  if (selectedStep.startsWith('E')) {
+    box.append(h('p', null, h('strong', null, selectedStep), ` is your evidence item ${selectedStep.slice(1)}.`),
+      btn('Show it', () => document.querySelector(`#evidence [data-item="${selectedStep.slice(1)}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })));
+    return;
+  }
+  const n = Number(selectedStep);
+  const step = steps[n - 1];
+  const row = logicRows()[n - 1];
+  if (!step || !row) return;
+  const kind = row.dataset.kind;
+  const edit = btn('Edit', () => {
+    row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    row.querySelector('input[type="text"]')?.focus({ preventScroll: true });
+  });
+  const remove = btn('Remove', () => removeStep(row));
+  const head = h('p', null, h('strong', null, `${LETTER[kind]}${n} `), ROLE_TITLE[kind], step.claim || step.so ? `: ${step.claim || step.so}` : '');
+  const groups = [];
+  const failsAt = steps.findIndex((s) => 'fails' in s);
+  if (kind === 'claim') {
+    groups.push(h('p', { class: 'hint' }, 'What does it rest on?'), h('div', { class: 'row' },
+      btn('Another claim', () => addStep('claim', { to: [n] })),
+      btn('Another paper', () => addStep('cites', { to: [n] })),
+      btn('A number', () => addStep('calc', { to: [n] }))));
+    groups.push(h('div', { class: 'row' },
+      btn('What follows from it?', () => addStep('so', { from: n })),
+      failsAt < 0 ? btn('It breaks here', () => addStep('fails', { to: [n] }), 'primary')
+        : (steps[failsAt].to ?? []).includes(n) ? null
+          : btn('Move the break here', () => {
+            const f = logicRows()[failsAt];
+            f.dataset.preset = JSON.stringify([n]);
+            clear(f.querySelector('.arrows'));
+            refreshLogic();
+            update();
+          })));
+  } else if (kind === 'calc') {
+    groups.push(h('div', { class: 'row' }, btn('A number it uses', () => addStep('calc', { before: n }))));
+  } else if (kind === 'so') {
+    groups.push(h('div', { class: 'row' }, btn('What follows from it?', () => addStep('so', { from: n }))));
+  } else if (kind === 'fails') {
+    groups.push(h('div', { class: 'row' }, btn('Which evidence shows it?', () => {
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      row.querySelector('[data-name="because"]')?.focus({ preventScroll: true });
+    })));
+  }
+  box.append(head, ...groups, h('div', { class: 'row' }, edit, remove));
 }
 
 /** Steps as written so far, with their arrows (for the map, before checking). */
@@ -222,7 +317,8 @@ function draftSteps() {
   const numbers = (v) => v.split(/[\s,]+/).filter(Boolean).map(Number).filter(Number.isInteger);
   return [...document.querySelectorAll('#logic .logic-step')].map((row) => {
     const get = (name) => row.querySelector(`[data-name="${name}"]`)?.value.trim() ?? '';
-    const to = [...row.querySelectorAll('.arrows input:checked')].map((c) => Number(c.value));
+    const drawn = row.querySelectorAll('.arrows input');
+    const to = drawn.length ? [...row.querySelectorAll('.arrows input:checked')].map((c) => Number(c.value)) : JSON.parse(row.dataset.preset ?? '[]');
     const arrows = to.length ? { to } : {};
     const kind = row.dataset.kind;
     if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}), ...arrows };
@@ -262,6 +358,7 @@ function refreshLogic(arrows = true) {
     row.classList.toggle('is-selected', selectedStep === String(i + 1));
     if (!arrows) return;
     const box = clear(row.querySelector('.arrows'));
+    delete row.dataset.preset;
     const allowed = targetsFor(steps, i);
     const chosen = new Set(steps[i].to ?? []);
     const word = row.dataset.kind === 'fails' ? 'Breaks' : 'Points to';
@@ -270,6 +367,8 @@ function refreshLogic(arrows = true) {
       h('input', { type: row.dataset.kind === 'fails' ? 'radio' : 'checkbox', name: `to-${i}`, value: String(n), checked: chosen.has(n) }),
       ` ${LETTER[rows[n - 1].dataset.kind]}${n}`))));
   });
+  if (selectedStep && !selectedStep.startsWith('E') && Number(selectedStep) > steps.length) selectedStep = null;
+  $('#logic-start').hidden = steps.length > 0;
   const box = clear($('#logic-map'));
   if (steps.length) {
     box.append(logicMap(steps, {
@@ -279,10 +378,11 @@ function refreshLogic(arrows = true) {
       onSelect: (id) => {
         selectedStep = id;
         refreshLogic(false);
-        rows[Number(id) - 1]?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        $('#logic-actions').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       },
     }));
   }
+  renderActions(steps);
 }
 
 function collectLogic(problems) {
