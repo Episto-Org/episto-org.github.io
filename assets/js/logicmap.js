@@ -115,23 +115,17 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
  */
 export function logicHelp() {
   return h('details', { class: 'help' },
-    h('summary', { 'aria-label': 'What logic trees are, and what they open up' }, '?'),
+    h('summary', { 'aria-label': 'How to read the logic map' }, '?'),
     h('div', { class: 'stack' },
-      h('p', null, h('strong', null, 'A logic tree '), 'shows how an argument is built: the claim at its centre, what holds it up, where the flag lands, and what depends on it. It is written in the proposer\'s own words, so it gives the context without the paper\'s text.'),
-      h('p', null, h('strong', null, 'Open to everyone. '), 'Every tree is in the public database under CC0, ready to download (data/meta/logic.jsonl, listed in the API), for anyone to use: researchers, libraries, educators, and companies that build machine-learning models.'),
-      h('p', null, h('strong', null, 'Close at hand:')),
+      h('p', null, h('strong', null, 'How to read it')),
       h('ul', null,
-        h('li', null, 'seeing at a glance which claims a study rests on, and which papers it builds on;'),
-        h('li', null, 'linking related work through the claims papers share;'),
-        h('li', null, 'teaching how arguments are built, with real examples;'),
-        h('li', null, 'meta-research on how evidence and conclusions connect across fields.')),
-      h('p', null, h('strong', null, 'Further out:')),
-      h('ul', null,
-        h('li', null, 'models that read an argument\'s structure, not just its words;'),
-        h('li', null, 'writing assistants that show authors how their conclusions hang together as they write;'),
-        h('li', null, 'a map of how knowledge builds on knowledge, that updates as evidence comes in;'),
-        h('li', null, 'a literature that corrects itself faster, because each claim carries its links.')),
-      h('p', { class: 'hint' }, 'Trees carry no personal data: not who proposed or reviewed a flag, nor how anyone voted.')));
+        h('li', null, h('strong', null, 'Centre: '), 'the load-bearing claim, the one the flag breaks.'),
+        h('li', null, h('strong', null, 'Arrows '), 'run from cause to effect: → supports, ⊣ breaks, ⊢ shows.'),
+        h('li', null, h('strong', null, 'Letters: '), 'C claim, P another paper, F the failure, S what follows, E evidence.'),
+        h('li', null, h('strong', null, 'Dashed red: '), 'falls with the centre.'),
+        h('li', null, h('strong', null, 'Select a step '), 'to see what it can connect to.')),
+      h('p', null, 'The line under the map says the same in logic: after ∴, what falls.'),
+      h('p', { class: 'hint' }, 'Open data (CC0) in the public database, free for any use, machine learning included.')));
 }
 
 /** Step numbers a step may point to, by role. */
