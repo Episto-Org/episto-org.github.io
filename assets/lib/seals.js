@@ -12,6 +12,7 @@
 import { canonicalJson } from './commitment.js';
 
 export const SEAL_VERSION = 'episto-seal-v1';
+export const RECOVERY_VERSION = 'episto-recovery-v1';
 export const KDF_ITERATIONS = 600000;
 export const MIN_PASSWORD = 16;
 export const NAMESPACE = 'episto-register';
@@ -56,15 +57,33 @@ const hex = (buf) => [...new Uint8Array(buf)].map((x) => x.toString(16).padStart
  * "Remember me" keeps in the browser.
  * @returns {Promise<{privateKey: CryptoKey, lockedKey: CryptoKey, publicBlob: Uint8Array, publicLine: string}>}
  */
-export async function deriveKey(pseudonym, password) {
+export async function deriveKey(pseudonym, password, version = SEAL_VERSION) {
   const base = await subtle().importKey('raw', utf8(password), 'PBKDF2', false, ['deriveBits']);
   const seed = new Uint8Array(await subtle().deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: utf8(`${SEAL_VERSION}:${pseudonym}`), iterations: KDF_ITERATIONS }, base, 256));
+    { name: 'PBKDF2', hash: 'SHA-256', salt: utf8(`${version}:${pseudonym}`), iterations: KDF_ITERATIONS }, base, 256));
   const privateKey = await subtle().importKey('pkcs8', concat(PKCS8_ED25519, seed), { name: 'Ed25519' }, true, ['sign']);
   const lockedKey = await subtle().importKey('pkcs8', concat(PKCS8_ED25519, seed), { name: 'Ed25519' }, false, ['sign']);
   const raw = fromBase64((await subtle().exportKey('jwk', privateKey)).x);
   const publicBlob = concat(sshString(utf8('ssh-ed25519')), sshString(raw));
   return { privateKey, lockedKey, publicBlob, publicLine: `ssh-ed25519 ${toBase64(publicBlob)}` };
+}
+
+/**
+ * The recovery key: made from the pseudonym and the recovery code, salted
+ * apart from the password key. It can only sign a request for a new key.
+ */
+export function deriveRecoveryKey(pseudonym, code) {
+  return deriveKey(pseudonym, normalizeCode(code), RECOVERY_VERSION);
+}
+
+/** A recovery code: 25 characters in 5 groups, about 125 bits. */
+export function suggestRecoveryCode() {
+  return Array.from({ length: 5 }, () => suggestPassword().replace(/-/g, '').slice(0, 5)).join('-');
+}
+
+/** Codes are typed back by hand: case, spaces and dashes do not matter. */
+export function normalizeCode(code) {
+  return String(code).toLowerCase().replace(/[^a-z0-9]/g, '').match(/.{1,5}/g)?.join('-') ?? '';
 }
 
 /** An SSHSIG signature (armored, as ssh-keygen -Y sign writes it). */

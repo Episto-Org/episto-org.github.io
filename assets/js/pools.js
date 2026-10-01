@@ -96,7 +96,7 @@ export function picker(cfg, selected, onChange) {
 
 // ------------------------------------------------------------ members.yaml entries
 
-const ORDER = ['pseudonym', 'forge', 'key', 'invited_by', 'pools', 'joined', 'status', 'roles', 'can_invite'];
+const ORDER = ['pseudonym', 'forge', 'key', 'recovery', 'invited_by', 'pools', 'joined', 'status', 'roles', 'can_invite'];
 
 function scalar(v) {
   if (v === null) return 'null';

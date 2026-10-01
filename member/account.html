@@ -59,7 +59,7 @@
     <label><input type="checkbox" id="remember"> Remember me on this device for 30 days</label>
     <span class="hint">Keeps your pseudonym, entry and key in this browser, never your password. Anyone using this browser can act as you until it expires: only on a device that is yours alone.</span>
   </div>
-  <div class="row"><button type="button" id="unlock" class="primary">Unlock</button> <button type="button" id="forget" hidden>Forget me</button></div>
+  <div class="row"><button type="button" id="unlock" class="primary">Unlock</button> <button type="button" id="logout" hidden>Log out</button></div>
   <p id="unlock-status" aria-live="polite"></p>
 </section>
 
@@ -90,7 +90,7 @@
       <option value="invite-request">Ask for an extra invitation for a pool</option>
       <option value="away">I'm away (not drawn until I return)</option>
       <option value="back">I'm back</option>
-      <option value="rekey">Change my password</option>
+      <option value="rekey">Change my password or recovery code</option>
       <option value="vouch-rekey">Vouch for the new key of someone I invited</option>
       <option value="stand">I stand for librarian (when a draw is open)</option>
       <option value="contact">Someone contacted me about a case I review</option>
@@ -105,10 +105,11 @@
     <input type="text" id="op-scope" autocomplete="off" spellcheck="false">
   </div>
   <div id="op-newpass-box">
-    <label for="op-newpass">New password</label> <span class="hint">At least 16 characters. The new key takes effect 7 days after the steward records it; until then your old password still works.</span>
+    <label for="op-newpass">New password</label> <span class="hint">At least 16 characters. It takes effect 7 days after the steward records it; until then your old password still works. Leave both empty to keep your password and only get a new recovery code.</span>
     <input type="password" id="op-newpass" autocomplete="new-password" spellcheck="false">
     <label for="op-newpass2">New password again</label>
     <input type="password" id="op-newpass2" autocomplete="new-password" spellcheck="false">
+    <label><input type="checkbox" id="op-newcode" checked> Give me a new recovery code too</label>
   </div>
   <div id="op-key-box">
     <label for="op-key">Their new key line</label> <span class="hint">What they sent you, starting <code>ssh-ed25519</code>. Vouch only after hearing from them directly that they lost their password.</span>
@@ -129,7 +130,31 @@
 
 <section id="new-password" class="panel stack">
   <h2>Lost your password?</h2>
-  <p>Nobody can recover it, Episto included. Keep your pseudonym and choose a new password: this makes your new key, here in your browser.</p>
+  <p>Nobody can read your password, Episto included, but you can replace it. Your pseudonym stays the same.</p>
+  <h3>With your recovery code</h3>
+  <p>The code you wrote down when you joined, or when you last changed your password. This makes a sealed request; put it in a pull request of its own, opened from your own GitHub account, the one registered to you. The steward tells that account in the <em>Key changes</em> issue and switches to your new password 7 days later. A change you did not ask for is stopped by commenting <code>/cancel</code> there.</p>
+  <div>
+    <label for="rc-pseudonym">Your pseudonym</label>
+    <input type="text" id="rc-pseudonym" autocomplete="username" spellcheck="false">
+  </div>
+  <div>
+    <label for="rc-code">Recovery code</label>
+    <input type="text" id="rc-code" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label for="rc-password">New password</label> <span class="hint">At least 16 characters.</span>
+    <input type="password" id="rc-password" autocomplete="new-password" spellcheck="false">
+    <div class="row"><button type="button" id="rc-suggest">Suggest a password</button> <code id="rc-suggested"></code></div>
+  </div>
+  <div>
+    <label for="rc-password2">New password again</label>
+    <input type="password" id="rc-password2" autocomplete="new-password" spellcheck="false">
+  </div>
+  <div class="row"><button type="button" id="rc-make" class="primary">Recover my account</button></div>
+  <p id="rc-status" aria-live="polite"></p>
+  <div id="rc-out" class="stack"></div>
+  <h3>Without a recovery code</h3>
+  <p>Your inviter vouches for your new key.</p>
   <ol>
     <li>Send the new key to the member who invited you, the private way your invitation came. Founders, and members whose inviter has left, send it to a librarian.</li>
     <li>They vouch for it on their account page and send you back a file.</li>

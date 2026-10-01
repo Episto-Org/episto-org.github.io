@@ -3,7 +3,7 @@
 
 import { h, $, clear, status } from './dom.js';
 import { parseEntry } from './pools.js';
-import { deriveKey, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
+import { deriveKey, deriveRecoveryKey, suggestRecoveryCode, normalizeCode, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
 import { readBundle } from './bundle.js';
 import { remember, recall, forget } from './remember.js';
 
@@ -15,6 +15,13 @@ function fileBlock(path, text, note) {
   const copy = h('button', { type: 'button' }, 'Copy');
   copy.addEventListener('click', () => navigator.clipboard.writeText(text));
   return h('div', { class: 'stack' }, h('p', null, h('strong', null, path), note ? ` ${note}` : ''), pre, h('div', { class: 'row' }, copy));
+}
+
+function codeBlock(code) {
+  return h('div', { class: 'stack notice notice-ok' },
+    h('p', null, h('strong', null, 'Your new recovery code. Write it down on paper now; it is shown only once.')),
+    h('p', null, h('code', { class: 'big' }, code)),
+    h('p', null, 'It replaces your old code when the change takes effect, 7 days after the steward records it.'));
 }
 
 function howTo(newFiles, editsMembers) {
@@ -47,7 +54,6 @@ async function unlock() {
   if ($('#remember').checked) {
     const until = await remember({ pseudonym, entry: $('#current').value, key });
     note += until ? ` Remembered on this device until ${until.toISOString().slice(0, 10)}.` : ' This browser would not keep it, so you will unlock again next time.';
-    $('#forget').hidden = !until;
   }
   $('#my-password').value = '';
   status(out, `${note} Requests are checked by the steward against the members list.`, 'ok');
@@ -57,6 +63,21 @@ async function unlock() {
 function showUnlocked() {
   $('#invite').hidden = !cfg.sealedRegister;
   $('#requests').hidden = !cfg.sealedRegister;
+  $('#logout').hidden = false;
+}
+
+/** Log out: forgets the key in this page and anything remembered on this device. */
+async function logout() {
+  await forget();
+  me = null;
+  $('#my-password').value = '';
+  $('#remember').checked = false;
+  $('#logout').hidden = true;
+  $('#invite').hidden = true;
+  $('#requests').hidden = true;
+  clear($('#request-out'));
+  clear($('#invite-out'));
+  status($('#unlock-status'), 'Logged out. Nothing is kept on this device.', 'ok');
 }
 
 /** Opens unlocked when "Remember me" was chosen on this device. */
@@ -70,7 +91,6 @@ async function restore() {
     $('#current').dispatchEvent(new Event('input'));
   }
   $('#remember').checked = true;
-  $('#forget').hidden = false;
   status($('#unlock-status'), `Unlocked as ${saved.pseudonym}, remembered on this device until ${saved.until.toISOString().slice(0, 10)}.`, 'ok');
   showUnlocked();
 }
@@ -144,10 +164,17 @@ async function sealOne() {
     payload = { op };
   } else if (op === 'rekey') {
     const pass = $('#op-newpass').value;
-    if (pass.length < MIN_PASSWORD) return status(st, `The new password needs at least ${MIN_PASSWORD} characters.`, 'error');
+    const newCode = $('#op-newcode').checked;
+    if (pass && pass.length < MIN_PASSWORD) return status(st, `The new password needs at least ${MIN_PASSWORD} characters.`, 'error');
     if (pass !== $('#op-newpass2').value) return status(st, 'The two new passwords differ.', 'error');
-    status(st, 'Making your new key. This takes a few seconds.');
-    payload = { op, key: (await deriveKey(me.pseudonym, pass)).publicLine };
+    if (!pass && !newCode) return status(st, 'Give a new password, or tick "Give me a new recovery code".', 'error');
+    status(st, 'Making your new keys. This takes a few seconds.');
+    payload = { op, key: pass ? (await deriveKey(me.pseudonym, pass)).publicLine : me.key.publicLine };
+    if (newCode) {
+      const code = suggestRecoveryCode();
+      payload.recovery = (await deriveRecoveryKey(me.pseudonym, code)).publicLine;
+      out.append(codeBlock(code));
+    }
   } else if (op === 'vouch-rekey') {
     const line = $('#op-key').value.trim().replace(/^key:\s*/, '').replace(/^"|"$/g, '').split(/\s+/).slice(0, 2).join(' ');
     if (!value) return status(st, 'Give their pseudonym.', 'error');
@@ -182,6 +209,28 @@ async function sealOne() {
         : 'Ready. Put this file in a pull request of its own.', 'ok');
 }
 
+/** Recovery with the code: signed with the recovery key, gives a new key and a new code. */
+async function recover() {
+  const st = $('#rc-status');
+  const out = clear($('#rc-out'));
+  const pseudonym = $('#rc-pseudonym').value.trim();
+  const code = normalizeCode($('#rc-code').value);
+  const password = $('#rc-password').value;
+  if (!new RegExp(cfg.pseudonymPattern).test(pseudonym)) return status(st, 'Give your pseudonym exactly as in the members list.', 'error');
+  if (code.replace(/-/g, '').length < 20) return status(st, 'Give your recovery code.', 'error');
+  if (password.length < MIN_PASSWORD) return status(st, `The new password needs at least ${MIN_PASSWORD} characters.`, 'error');
+  if (password !== $('#rc-password2').value) return status(st, 'The two passwords differ.', 'error');
+  if (!cfg.stewardKey) return status(st, 'The steward key is not published yet.', 'error');
+  status(st, 'Making your new keys and sealing the request. This takes a few seconds.');
+  const signer = await deriveRecoveryKey(pseudonym, code);
+  const key = await deriveKey(pseudonym, password);
+  const next = suggestRecoveryCode();
+  const recovery = await deriveRecoveryKey(pseudonym, next);
+  const file = await sealedRequest(signer, pseudonym, { op: 'recover', key: key.publicLine, recovery: recovery.publicLine }, cfg.stewardKey);
+  out.append(codeBlock(next), fileBlock(file.path, file.text), howTo([file.path], false));
+  status(st, 'Ready. Put this file in a pull request of its own, from your own GitHub account. If the code was wrong, the steward says so on the pull request.', 'ok');
+}
+
 /** A new key for a lost password: the pseudonym stays, the key line changes. */
 async function newKey() {
   const st = $('#np-status');
@@ -204,14 +253,13 @@ export function initRegister(config) {
   $('#prepare-invite').addEventListener('click', () => prepareInvite().catch(fail('#invite-status')));
   $('#seal-request').addEventListener('click', () => sealOne().catch(fail('#request-status')));
   $('#np-make').addEventListener('click', () => newKey().catch(fail('#np-status')));
-  $('#forget').addEventListener('click', async () => {
-    await forget();
-    me = null;
-    $('#forget').hidden = true;
-    $('#remember').checked = false;
-    $('#invite').hidden = true;
-    $('#requests').hidden = true;
-    status($('#unlock-status'), 'Forgotten on this device. Unlock with your password next time.', 'ok');
+  $('#logout').addEventListener('click', () => logout().catch(fail('#unlock-status')));
+  $('#rc-make').addEventListener('click', () => recover().catch(fail('#rc-status')));
+  $('#rc-suggest').addEventListener('click', () => {
+    const p = suggestPassword();
+    $('#rc-password').value = p;
+    $('#rc-password2').value = p;
+    $('#rc-suggested').textContent = p;
   });
   restore();
   $('#np-suggest').addEventListener('click', () => {

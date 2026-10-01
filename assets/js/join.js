@@ -3,7 +3,7 @@
 
 import { h, $, clear, download, status } from './dom.js';
 import { loadPoolsConfig, explainer, picker, entryYaml, today, poolLabel } from './pools.js';
-import { deriveKey, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
+import { deriveKey, deriveRecoveryKey, suggestRecoveryCode, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
 import { writeBundle } from './bundle.js';
 
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -42,11 +42,14 @@ async function write(ev) {
   }
   status(box, 'Sealing. This takes a few seconds.');
   const key = await deriveKey(pseudonym, password);
+  const code = suggestRecoveryCode();
+  const recovery = await deriveRecoveryKey(pseudonym, code);
   const day = today();
   entry = {
     pseudonym,
     ...(cfg.sealedRegister ? {} : { forge }),
     key: key.publicLine,
+    recovery: recovery.publicLine,
     invited_by: inviter === 'founder' ? null : inviter,
     pools: Object.fromEntries([...selected].map((p) => [p, day])),
     joined: day,
@@ -54,6 +57,7 @@ async function write(ev) {
   };
   const request = cfg.sealedRegister ? await sealedRequest(key, pseudonym, { op: 'login', login: forge, scope: 'default' }, cfg.stewardKey) : null;
   $('#entry').textContent = writeBundle(entryYaml(entry), request);
+  $('#recovery-code').textContent = code;
   clear(box).append(h('span', { class: 'notice notice-ok' },
     `Your pools: ${[...selected].map((p) => poolLabel(cfg, p)).join(', ')}. They count from the day you join. Pools you add after your first ${cfg.newMemberDays} days wait ${cfg.choiceDelayDays} days before they count.`));
   steps(entry);
