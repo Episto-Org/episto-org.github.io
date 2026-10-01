@@ -30,8 +30,9 @@
     <div class="row"><input type="text" id="pseudonym" autocomplete="off" spellcheck="false" readonly> <button type="button" id="another">Another one</button></div>
   </div>
   <div>
-    <label for="inviter">Your inviter's pseudonym</label> <span class="hint">Founders write <code>founder</code>.</span>
-    <input type="text" id="inviter" autocomplete="off" spellcheck="false">
+    <label for="invite-code">Invitation code</label> <span class="hint">Filled in when you open your invitation link. Otherwise paste the code your inviter sent you.</span>
+    <input type="text" id="invite-code" autocomplete="off" spellcheck="false">
+    <p id="invite-note" class="hint" aria-live="polite"></p>
   </div>
   <div>
     <label for="forge">GitHub username</label> <span class="hint">An account made only for Episto, with two-step verification on. Not your usual one.</span>

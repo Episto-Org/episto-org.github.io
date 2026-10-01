@@ -3,7 +3,7 @@
 
 import { h, $, clear, download, status } from './dom.js';
 import { loadPoolsConfig, explainer, picker, entryYaml, today, poolLabel } from './pools.js';
-import { deriveKey, deriveRecoveryKey, suggestRecoveryCode, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
+import { parseInvite, INVITE_DAYS, deriveKey, deriveRecoveryKey, suggestRecoveryCode, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
 import { writeBundle } from './bundle.js';
 
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -23,12 +23,14 @@ async function write(ev) {
   ev.preventDefault();
   const problems = [];
   const pseudonym = $('#pseudonym').value.trim();
-  const inviter = $('#inviter').value.trim();
+  const founder = location.hash === '#founder';
+  const invite = founder ? null : parseInvite($('#invite-code').value);
+  const inviter = founder ? 'founder' : invite?.by ?? '';
   const forge = $('#forge').value.trim();
   const password = $('#password').value;
   const pattern = new RegExp(cfg.pseudonymPattern);
   if (!pattern.test(pseudonym)) problems.push('the pseudonym must be 3-32 lower-case letters, digits and hyphens');
-  if (!pattern.test(inviter)) problems.push('give your inviter\'s pseudonym');
+  if (!founder && !invite) problems.push('open your invitation link, or paste the invitation code');
   if (pseudonym && pseudonym === inviter) problems.push('you cannot invite yourself');
   if (!LOGIN.test(forge)) problems.push('give your GitHub username');
   if (password.length < MIN_PASSWORD) problems.push(`the password needs at least ${MIN_PASSWORD} characters`);
@@ -50,7 +52,8 @@ async function write(ev) {
     ...(cfg.sealedRegister ? {} : { forge }),
     key: key.publicLine,
     recovery: recovery.publicLine,
-    invited_by: inviter === 'founder' ? null : inviter,
+    invited_by: founder ? null : inviter,
+    ...(invite ? { invite: invite.code } : {}),
     pools: Object.fromEntries([...selected].map((p) => [p, day])),
     joined: day,
     status: 'active',
@@ -76,6 +79,22 @@ async function main() {
   $('#picker').append(picker(cfg, selected, () => {}));
   $('#join-form').addEventListener('submit', (ev) => write(ev).catch((e) => status($('#join-problems'), `Sealing failed: ${e.message}. Use a current browser.`, 'error')));
   $('#pseudonym').value = suggestPseudonym();
+  // An invitation link carries the code after #invite=.
+  const fromLink = /^#invite=(.+)$/.exec(location.hash);
+  if (fromLink) $('#invite-code').value = decodeURIComponent(fromLink[1]);
+  const showInvite = () => {
+    const i = parseInvite($('#invite-code').value);
+    const note = $('#invite-note');
+    if (location.hash === '#founder') note.textContent = 'Joining as a founder: no inviter.';
+    else if (!$('#invite-code').value.trim()) note.textContent = 'Membership is by invitation: you need a link or code from a member.';
+    else if (!i) note.textContent = 'That is not an invitation code. Copy the whole code, or open the link.';
+    else {
+      const until = new Date(Date.parse(`${i.day}T00:00:00Z`) + INVITE_DAYS * 86_400_000).toISOString().slice(0, 10);
+      note.textContent = `Invited by ${i.by}. The code works until ${until}.`;
+    }
+  };
+  $('#invite-code').addEventListener('input', showInvite);
+  showInvite();
   $('#another').addEventListener('click', () => {
     $('#pseudonym').value = suggestPseudonym();
   });

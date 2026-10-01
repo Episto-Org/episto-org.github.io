@@ -3,7 +3,7 @@
 
 import { h, $, clear, status } from './dom.js';
 import { parseEntry } from './pools.js';
-import { deriveKey, deriveRecoveryKey, suggestRecoveryCode, normalizeCode, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
+import { signInvite, INVITE_DAYS, deriveKey, deriveRecoveryKey, suggestRecoveryCode, normalizeCode, sealedRequest, digestOf, suggestPassword, MIN_PASSWORD } from '../lib/seals.js';
 import { readBundle } from './bundle.js';
 import { remember, recall, forget } from './remember.js';
 
@@ -101,6 +101,16 @@ function addEntry(membersText, entryText) {
   return text.replace(/\n*$/, '\n') + entryText;
 }
 
+/** A one-time invitation, signed with the member's key. */
+async function makeInvite() {
+  const box = clear($('#made-invite'));
+  const full = await signInvite(me.key, me.pseudonym);
+  const link = new URL(`join.html#invite=${full}`, location.href).href;
+  box.append(
+    fileBlock('Invitation link', link, `Open it to join. It works once, for ${INVITE_DAYS} days.`),
+    fileBlock('Or the invitation code', full, 'For the "Invitation code" box on the join page.'));
+}
+
 async function prepareInvite() {
   const out = clear($('#invite-out'));
   const st = $('#invite-status');
@@ -113,6 +123,7 @@ async function prepareInvite() {
     return status(st, `That reply cannot be read: ${e.message}.`, 'error');
   }
   if (entry.invited_by !== me.pseudonym) return status(st, `The reply names ${entry.invited_by} as inviter, not you.`, 'error');
+  if (!entry.invite) return status(st, 'The reply has no invitation code: they need to join with the link you made.', 'error');
   if (!$('#members-now').value.includes('members:')) return status(st, 'Paste the whole members list as it is now.', 'error');
   const members = addEntry($('#members-now').value, bundle.entryText);
   status(st, 'Sealing.');
@@ -251,6 +262,7 @@ export function initRegister(config) {
   const fail = (el) => (e) => status($(el), `That did not work: ${e.message}.`, 'error');
   $('#unlock').addEventListener('click', () => unlock().catch(fail('#unlock-status')));
   $('#prepare-invite').addEventListener('click', () => prepareInvite().catch(fail('#invite-status')));
+  $('#make-invite').addEventListener('click', () => makeInvite().catch(fail('#invite-status')));
   $('#seal-request').addEventListener('click', () => sealOne().catch(fail('#request-status')));
   $('#np-make').addEventListener('click', () => newKey().catch(fail('#np-status')));
   $('#logout').addEventListener('click', () => logout().catch(fail('#unlock-status')));

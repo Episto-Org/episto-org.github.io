@@ -159,6 +159,30 @@ export function suggestPseudonym() {
   return `${pick(ADJECTIVES)}-${pick(NOUNS)}-${n}`;
 }
 
+export const INVITE_DAYS = 30;
+
+/** What an inviter signs: who invites, on which day, and a one-time nonce. */
+export function inviteMessage(by, day, nonce) {
+  return `episto-invite-v1|${by}|${day}|${nonce}`;
+}
+
+/**
+ * An invitation from `by`, signed with their key: "<by>.<day>.<nonce>.<sig>".
+ * The part after the pseudonym goes into the new member's entry as `invite`,
+ * so anyone can check that the named inviter invited them.
+ */
+export async function signInvite(key, by, day = today()) {
+  const nonce = randomHex(8);
+  const sig = new Uint8Array(await subtle().sign('Ed25519', key.privateKey, utf8(inviteMessage(by, day, nonce))));
+  return `${by}.${day}.${nonce}.${toBase64(sig).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
+}
+
+/** @returns {null | {by, day, nonce, sig, code}} */
+export function parseInvite(text) {
+  const m = /^([a-z0-9][a-z0-9-]{2,31})\.(\d{4}-\d{2}-\d{2})\.([0-9a-f]{16})\.([A-Za-z0-9_-]{86})$/.exec(String(text).trim());
+  return m ? { by: m[1], day: m[2], nonce: m[3], sig: m[4], code: `${m[2]}.${m[3]}.${m[4]}` } : null;
+}
+
 /** A strong random password: 20 characters in 4 groups, about 100 bits. */
 export function suggestPassword() {
   const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
