@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Browse · Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Check</a></li><li><a href="browse.html" aria-current="page">Browse</a></li><li><a href="guide.html">Flag guide</a></li><li><a href="download.html">Download</a></li><li><a href="about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>Browse flags</h1>
+<p class="lead">Every retraction, official notice and verified community flag, by the question each one answers.</p>
+
+<div class="panel">
+  <label for="q">Search</label> <span class="hint">title, author, journal or DOI</span>
+  <input id="q" type="search" autocomplete="off" placeholder="Start typing to search">
+</div>
+
+<div id="tiles" class="tiles" aria-label="Categories"></div>
+
+<div class="browse">
+  <aside class="filters panel" aria-label="Filters">
+    <details id="filter-box" open>
+      <summary>Filters</summary>
+      <form id="filters">
+        <fieldset>
+          <legend>Category</legend>
+          <select id="f-category" aria-label="Category"><option value="">All categories</option></select>
+        </fieldset>
+        <fieldset>
+          <legend>Type</legend>
+          <select id="f-type" aria-label="Flag type"><option value="">All types</option></select>
+        </fieldset>
+        <fieldset id="f-severity">
+          <legend>Severity</legend>
+          <label class="check"><input type="checkbox" value="critical"> Critical</label>
+          <label class="check"><input type="checkbox" value="major"> Major</label>
+          <label class="check"><input type="checkbox" value="caution"> Caution</label>
+          <label class="check"><input type="checkbox" value="propagated"> Builds on flagged work</label>
+        </fieldset>
+        <fieldset>
+          <legend>Source</legend>
+          <select id="f-source" aria-label="Source">
+            <option value="">All sources</option>
+            <option value="community">Community flags</option>
+            <option value="retraction-watch">Official notices (Retraction Watch)</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Status</legend>
+          <select id="f-status" aria-label="Status">
+            <option value="">Current flags</option>
+            <option value="withdrawn">Withdrawn after dispute</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Domain</legend>
+          <select id="f-domain" aria-label="Domain"><option value="">All domains</option></select>
+        </fieldset>
+        <fieldset>
+          <legend>Field</legend>
+          <select id="f-field" aria-label="Field"><option value="">All fields</option></select>
+        </fieldset>
+        <fieldset>
+          <legend>Publication year</legend>
+          <div class="row"><input id="f-from" type="number" min="1600" max="2100" placeholder="From" aria-label="From year"><input id="f-to" type="number" min="1600" max="2100" placeholder="To" aria-label="To year"></div>
+        </fieldset>
+        <button type="reset" id="f-reset">Clear filters</button>
+      </form>
+    </details>
+  </aside>
+  <section aria-live="polite">
+    <div class="row spread">
+      <p class="count" id="count"></p>
+      <label>Sort <select id="sort">
+        <option value="flagged">Newest flag</option>
+        <option value="severity">Severity</option>
+        <option value="year">Publication year</option>
+        <option value="title">Title</option>
+      </select></label>
+    </div>
+    <ul class="papers" id="list"></ul>
+    <div class="pager" id="pager"></div>
+  </section>
+</div>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="assets/js/browse.js"></script>
+</body>
+</html>

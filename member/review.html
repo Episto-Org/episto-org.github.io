@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Sealed review · Episto</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="../index.html">Check</a></li><li><a href="../browse.html">Browse</a></li><li><a href="../guide.html">Flag guide</a></li><li><a href="../download.html">Download</a></li><li><a href="../about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<nav class="member-tools" aria-label="Member tools"><ul><li><a href="propose.html">Propose a flag</a></li><li><a href="review.html" aria-current="page">Sealed review</a></li><li><a href="join.html">Join</a></li><li><a href="account.html">My account</a></li></ul></nav>
+<h1>Sealed review</h1>
+<p class="lead">Judge the evidence on your own and seal your review. Only the steward can open it, and it opens every review on the panel at once. Everything happens in your browser.</p>
+
+<section class="panel stack">
+  <h2>1. The case</h2>
+  <label for="ticket">Paste the ticket from the steward's comment</label>
+  <textarea id="ticket" class="short" spellcheck="false" placeholder='{"v":1,"case":"...","round":1,...}'></textarea>
+  <p id="ticket-status" class="hint" aria-live="polite"></p>
+</section>
+
+<form id="review-form" class="panel stack" hidden novalidate>
+  <h2>2. Your review</h2>
+  <div id="evidence-findings"></div>
+  <fieldset>
+    <legend><strong>Verdict</strong></legend>
+    <div id="verdicts" class="row"></div>
+  </fieldset>
+  <div id="severity-box" hidden>
+    <label for="severity">Severity</label> <span class="hint">only if the flag holds</span><br>
+    <select id="severity"></select>
+  </div>
+  <div>
+    <label for="summary">Summary</label> <span class="hint">one or two sentences, shown publicly without your name (10-280 characters)</span>
+    <textarea id="summary" class="short"></textarea>
+  </div>
+  <div>
+    <label for="reasoning">Reasoning</label> <span class="hint">optional, kept in the members' repository</span>
+    <textarea id="reasoning" class="medium"></textarea>
+  </div>
+  <p id="form-problems" aria-live="polite"></p>
+  <button type="submit" class="primary">Seal my review</button>
+</form>
+
+<section id="sealed" class="panel stack" hidden>
+  <h2>3. Post your seal</h2>
+  <p>Post exactly this as a comment on the pull request. It reveals nothing about your verdict.</p>
+  <pre id="commit-line"></pre>
+  <div class="row"><button type="button" id="copy-commit">Copy</button><button type="button" id="save-review">Download my review (keep it)</button></div>
+  <p id="keep-note" class="notice">Keep the downloaded file until you reveal. Without it you cannot reveal, and a sealed review that is not revealed counts against a change.</p>
+  <p id="sealed-note" class="notice" hidden>That is all: your review is sealed to the steward, and there is nothing to reveal. The steward opens every review on the panel at once, when all have sealed.</p>
+</section>
+
+<section id="reveal-box" class="panel stack">
+  <h2>4. Reveal</h2>
+  <p>When the steward says all seats are sealed, post the reveal. Load your saved review if this browser does not have it.</p>
+  <div class="row"><label class="button" for="load-review">Load saved review</label><input id="load-review" type="file" accept=".json,application/json" class="visually-hidden"></div>
+  <pre id="reveal-text" hidden></pre>
+  <div class="row"><button type="button" id="copy-reveal" hidden>Copy the reveal</button></div>
+  <p id="reveal-status" aria-live="polite"></p>
+</section>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="../about.html">How flags are decided</a></li>
+<li><a href="../download.html">Download the data</a></li>
+<li><a href="../member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="../assets/js/review.js"></script>
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Flag guide · Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Check</a></li><li><a href="browse.html">Browse</a></li><li><a href="guide.html" aria-current="page">Flag guide</a></li><li><a href="download.html">Download</a></li><li><a href="about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>Flag guide</h1>
+<p class="lead">Every kind of problem Episto flags, what it means, and what evidence a flag needs. A flag always describes a specific claim, figure, table or dataset, never a person.</p>
+<h2>Severity</h2>
+<div class="table-scroll"><table><tbody><tr><td><span class="chip chip-critical">Critical</span></td><td>The flagged result cannot be relied on at all.</td></tr><tr><td><span class="chip chip-major">Major</span></td><td>The flagged conclusion is not supported as stated. Parts of the work may still hold.</td></tr><tr><td><span class="chip chip-caution">Caution</span></td><td>The result may hold, but should not be relied on without the stated limitation.</td></tr><tr><td><span class="chip chip-propagated">Builds on flagged work</span></td><td>Not flagged itself, but cites work flagged Critical or Major. Computed by the build, never proposed.</td></tr></tbody></table></div>
+<h2>Categories</h2>
+<ul><li><a href="#integrity">Integrity</a>: Is the data genuine and honestly reported?</li>
+<li><a href="#evidence">Evidence basis</a>: Is there a scientific test behind the claim at all?</li>
+<li><a href="#design">Study design</a>: Could this design answer the question?</li>
+<li><a href="#sample">Sample</a>: Who or what was studied, and was it enough?</li>
+<li><a href="#stats">Numbers and statistics</a>: Are the numbers and analyses right?</li>
+<li><a href="#reasoning">Reasoning and conclusions</a>: Do the conclusions follow from the results?</li>
+<li><a href="#sources">Sources and citations</a>: Does it rest on sound, correctly cited work?</li>
+<li><a href="#transparency">Transparency and reproducibility</a>: Can others check and repeat it?</li>
+<li><a href="#interests">Conflicts of interest</a>: Who had a stake, and was it disclosed?</li>
+<li><a href="#notices">Official notices</a>: What have the journal or publisher said?</li></ul>
+<section id="integrity">
+<h2>Integrity</h2>
+<p class="lead">Is the data genuine and honestly reported?</p>
+
+<section class="guide-type" id="integrity.fabrication">
+<h3>Fabricated data</h3>
+<p><span class="chip chip-critical">Critical</span></p>
+<p>The reported data cannot have come from the study as described.</p>
+<p><strong>Evidence required</strong></p><ul><li>Patterns that genuine data cannot produce, shown on several values (for example repeated GRIM/SPRITE failures, or duplicated sequences or rows in shared raw data), with the calculation attached</li><li>Or an institutional or publisher finding, linked</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>A single inconsistent value (use stats.impossible-values)</li><li>Results that look &quot;too good to be true&quot;</li><li>Digit-distribution tests such as Benford&#39;s law on their own</li></ul>
+<p><strong>How to check it yourself:</strong> GRIM, GRIMMER, SPRITE, Carlisle baseline test</p>
+<p class="hint">Also imported from retraction notices giving the reason: Falsification/Fabrication of Data; Falsification/Fabrication of Results.</p>
+</section>
+<section class="guide-type" id="integrity.falsification">
+<h3>Altered data or results</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Data or results were changed, or observations removed, without disclosure, so the reported results differ from what was observed.</p>
+<p><strong>Evidence required</strong></p><ul><li>Side-by-side comparison of raw or registered data with what is reported</li><li>Or an institutional or publisher finding, linked</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Disclosed exclusions the proposer disagrees with (use sample.exclusions)</li></ul>
+
+<p class="hint">Also imported from retraction notices giving the reason: Manipulation of Results; Manipulation of Data.</p>
+</section>
+<section class="guide-type" id="integrity.image-manipulation">
+<h3>Duplicated, manipulated or generated images</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Figure images are duplicated, spliced, cloned, altered or generated by software (including generative models) in a way that changes what they show or presents synthetic images as observations.</p>
+<p><strong>Evidence required</strong></p><ul><li>Annotated image pairs or overlays with figure and panel labels</li><li>Tool name and settings, so anyone can reproduce the finding</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Compression artefacts or contrast adjustment applied to the whole image</li></ul>
+<p><strong>How to check it yourself:</strong> ImageJ, Forensically</p>
+<p class="hint">Also imported from retraction notices giving the reason: Duplication of/in Image; Manipulation of Images; Falsification/Fabrication of Image.</p>
+</section>
+<section class="guide-type" id="integrity.duplicate-publication">
+<h3>Same data published as new</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The same data or results appear in another paper, presented as new without cross-reference. Reviews and meta-analyses then count one dataset twice.</p>
+<p><strong>Evidence required</strong></p><ul><li>Both papers, with the matching samples, tables or results side by side</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Duplication of/in Article; Duplication of Data; Salami Slicing.</p>
+</section>
+<section class="guide-type" id="integrity.copied-results">
+<h3>Copied data or results</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Data or results were taken from another source and presented as the authors&#39; own findings.</p>
+<p><strong>Evidence required</strong></p><ul><li>The original source and the copied material side by side</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Copied wording without copied data or results (out of scope)</li></ul>
+
+<p class="hint">Also imported from retraction notices giving the reason: Plagiarism of Data; Plagiarism of Image.</p>
+</section>
+<section class="guide-type" id="integrity.paper-mill">
+<h3>Paper-mill product</h3>
+<p><span class="chip chip-critical">Critical</span></p>
+<p>The paper matches the template of mass-produced fraudulent papers.</p>
+<p><strong>Evidence required</strong></p><ul><li>Shared images, text or data with unrelated papers, listed</li><li>Or a publisher investigation, linked</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Paper Mill.</p>
+</section>
+<section class="guide-type" id="integrity.generated-content">
+<h3>Nonsense or machine-generated content</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Text or analysis is generated or garbled (&quot;tortured phrases&quot;) rather than describing real work.</p>
+<p><strong>Evidence required</strong></p><ul><li>Excerpts with each problem phrase and its standard term</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Suspicion of AI-assisted writing when the content is coherent and correct</li></ul>
+<p><strong>How to check it yourself:</strong> Problematic Paper Screener</p>
+<p class="hint">Also imported from retraction notices giving the reason: Computer-Aided Content or Computer-Generated Content; Hoax Paper.</p>
+</section>
+<section class="guide-type" id="integrity.false-approval-claims">
+<h3>False ethics, registration or data claims</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The paper cites an ethics approval, trial registration or data deposit that does not exist or does not match the study.</p>
+<p><strong>Evidence required</strong></p><ul><li>Registry or repository lookup showing the number is absent or refers to a different study</li><li>Or a statement from the named institution</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="integrity.compromised-review">
+<h3>Compromised peer review</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Peer review was faked or manipulated, so the paper was never independently checked.</p>
+<p><strong>Evidence required</strong></p><ul><li>A publisher statement, or documentary proof that reviewer identities were fake</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Compromised Peer Review; Rogue Editor.</p>
+</section>
+</section>
+<section id="evidence">
+<h2>Evidence basis</h2>
+<p class="lead">Is there a scientific test behind the claim at all?</p>
+
+<section class="guide-type" id="evidence.no-test">
+<h3>No test of the claim</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>The claim is presented as a finding, but no data, experiment, observation or analysis in the paper tests it.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, quoted</li><li>Where the methods and results were checked, and why none of them test it</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Papers labelled as essays, commentaries or hypotheses that do not present their claims as findings</li></ul>
+
+
+</section>
+<section class="guide-type" id="evidence.unfalsifiable">
+<h3>Claim cannot be tested</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The claim is stated so that no possible observation could count against it, yet it is presented as established.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, quoted</li><li>Why no outcome would contradict it, with the paper&#39;s own wording</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="evidence.anecdotal">
+<h3>Anecdotes presented as general evidence</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Case reports, testimonials or personal experience are used to support a general claim.</p>
+<p><strong>Evidence required</strong></p><ul><li>The general claim, quoted</li><li>That its support consists of individual cases or testimonials, with counts</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>A case report that describes its case without generalising</li></ul>
+
+
+</section>
+<section class="guide-type" id="evidence.authority-only">
+<h3>Opinion or authority only</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>An empirical claim rests only on expert opinion, consensus or the authors&#39; standing, with no data behind it.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, quoted, and the references it relies on, shown to contain no data</li></ul>
+
+
+
+</section>
+</section>
+<section id="design">
+<h2>Study design</h2>
+<p class="lead">Could this design answer the question?</p>
+
+<section class="guide-type" id="design.no-comparison">
+<h3>Missing or unsuitable comparison</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>An effect is claimed without a control or comparison group, or the comparison group differs in ways that explain the result.</p>
+<p><strong>Evidence required</strong></p><ul><li>The effect claim, quoted</li><li>The design description showing no comparison, or the relevant difference</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="design.confounding">
+<h3>Obvious confounder not addressed</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A factor that plausibly drives both the exposure and the outcome was not measured, adjusted for or discussed.</p>
+<p><strong>Evidence required</strong></p><ul><li>The confounder, with published evidence that it affects both the exposure and the outcome</li><li>That the paper neither adjusts for it nor discusses it</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>A list of possible confounders without evidence that each matters</li></ul>
+
+
+</section>
+<section class="guide-type" id="design.collider-bias">
+<h3>Selection on or adjustment for a common effect</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The analysis selects the sample on, or adjusts for, a variable caused by both the exposure and the outcome (a collider), or adjusts for a consequence of the exposure, creating or hiding an association.</p>
+<p><strong>Evidence required</strong></p><ul><li>The variable and how the paper selects or adjusts on it</li><li>Why it is caused by both the exposure and the outcome (or by the exposure), with a causal diagram or published evidence</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>That a different adjustment set would also be reasonable</li></ul>
+
+
+</section>
+<section class="guide-type" id="design.immortal-time">
+<h3>Immortal-time or other time-related bias</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Follow-up time during which the outcome could not occur in one group is counted in its favour, or exposure is defined using information from after the start of follow-up.</p>
+<p><strong>Evidence required</strong></p><ul><li>How the paper defines the start of follow-up and the exposure</li><li>The period that is misclassified, and why it favours one group</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>That a target-trial design would have been better in general</li></ul>
+
+
+</section>
+<section class="guide-type" id="design.no-randomisation-blinding">
+<h3>No randomisation or blinding where the claim needs it</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A causal or treatment claim is made from a design where allocation or assessment could be biased, with no randomisation or blinding.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, and the allocation and assessment procedure as described</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="design.invalid-measure">
+<h3>Measure does not capture the claim</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The instrument, proxy or outcome measure does not measure what the conclusion is about, or has not been validated for this use.</p>
+<p><strong>Evidence required</strong></p><ul><li>The measure and the claim side by side</li><li>Validation literature, or its absence, for this population and use</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="design.misidentified-materials">
+<h3>Misidentified or contaminated materials</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Cell lines, organisms, reagents or antibodies were not what the paper says they were.</p>
+<p><strong>Evidence required</strong></p><ul><li>A register entry (for example ICLAC or Cellosaurus) or authentication data</li></ul>
+
+<p><strong>How to check it yourself:</strong> ICLAC register, Cellosaurus</p>
+<p class="hint">Also imported from retraction notices giving the reason: Contamination of Cell Lines/Tissues; Contamination of Materials; Error in Cell Lines/Tissues.</p>
+</section>
+<section class="guide-type" id="design.measurement-artefact">
+<h3>Instrument or measurement artefact</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>The result is produced by equipment fault, calibration error or a known artefact of the method.</p>
+<p><strong>Evidence required</strong></p><ul><li>The artefact demonstrated, or documented for this instrument or method</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="design.wrong-timescale">
+<h3>Wrong timescale or dose for the claim</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Follow-up, exposure or dose is too short or too small for the claimed effect to appear or be ruled out.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, and published evidence on the timescale or dose it needs</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="design.unvalidated-model">
+<h3>Unvalidated model presented as a finding</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Results come from a model or simulation whose key assumptions were not tested, and are presented as empirical findings.</p>
+<p><strong>Evidence required</strong></p><ul><li>The assumptions that drive the result, and why they are untested</li><li>Ideally, the result changing under a reasonable alternative assumption</li></ul>
+
+
+
+</section>
+</section>
+<section id="sample">
+<h2>Sample</h2>
+<p class="lead">Who or what was studied, and was it enough?</p>
+
+<section class="guide-type" id="sample.too-small">
+<h3>Sample too small for the claim</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The sample cannot reliably detect or estimate the effect claimed.</p>
+<p><strong>Evidence required</strong></p><ul><li>A power or precision calculation (for example confidence interval width) using the paper&#39;s own numbers</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>A claim that the sample &quot;seems small&quot;, with no calculation</li></ul>
+
+
+</section>
+<section class="guide-type" id="sample.unrepresentative">
+<h3>Sample does not match the claim</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The claim covers a population that the sample does not represent (convenience, single site, WEIRD, one sex or age group).</p>
+<p><strong>Evidence required</strong></p><ul><li>The generalising claim, quoted, and the sample description</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="sample.selection-bias">
+<h3>Selection bias</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Who ended up in the sample depends on the outcome or on factors linked to it (self-selection, survivorship, selecting on the outcome).</p>
+<p><strong>Evidence required</strong></p><ul><li>The recruitment or inclusion route, and how it links to the outcome</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="sample.attrition">
+<h3>Dropout or missing data not handled</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>High or unequal dropout or missing data could explain the result, and the analysis does not deal with it.</p>
+<p><strong>Evidence required</strong></p><ul><li>Numbers enrolled and analysed per group, and the handling described</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="sample.exclusions">
+<h3>Undisclosed or after-the-fact exclusions</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Participants or data points were excluded without reporting, or by rules set after seeing results.</p>
+<p><strong>Evidence required</strong></p><ul><li>Numbers that do not add up between stages, or rules that differ from the registration</li></ul>
+
+
+
+</section>
+</section>
+<section id="stats">
+<h2>Numbers and statistics</h2>
+<p class="lead">Are the numbers and analyses right?</p>
+
+<section class="guide-type" id="stats.impossible-values">
+<h3>Impossible or inconsistent numbers</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Reported values cannot all be true: means impossible for the sample size, p-values that do not match test statistics, totals that do not add up.</p>
+<p><strong>Evidence required</strong></p><ul><li>Each inconsistent value, with the recalculation</li><li>Whether the inconsistency affects the conclusion (sets severity)</li></ul>
+
+<p><strong>How to check it yourself:</strong> GRIM, GRIMMER, SPRITE, statcheck</p>
+<p class="hint">Also imported from retraction notices giving the reason: Error in Data.</p>
+</section>
+<section class="guide-type" id="stats.wrong-analysis">
+<h3>Wrong test or broken assumptions</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The statistical method does not fit the data or design, and using the right one changes the conclusion.</p>
+<p><strong>Evidence required</strong></p><ul><li>Why the method does not fit</li><li>The result with a suitable method, or why it cannot be computed from what is reported</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Error in Analyses.</p>
+</section>
+<section class="guide-type" id="stats.unit-of-analysis">
+<h3>Pseudoreplication</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Repeated measurements of the same unit are treated as independent, inflating the sample size.</p>
+<p><strong>Evidence required</strong></p><ul><li>The true independent units and the n used in the analysis</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.selective-analysis">
+<h3>Selective analysis (p-hacking)</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Several analyses were evidently tried and the favourable ones reported, without disclosure.</p>
+<p><strong>Evidence required</strong></p><ul><li>Undisclosed analytic choices shown against a registration, earlier version or the paper&#39;s own data</li><li>Or a clustering of key p-values just under the threshold across the paper, with the list</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>A single p-value near the threshold</li></ul>
+<p><strong>How to check it yourself:</strong> p-curve</p>
+
+</section>
+<section class="guide-type" id="stats.multiple-comparisons">
+<h3>Many tests, no correction</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Many comparisons were run and the significant few reported as findings, without correction or acknowledgement.</p>
+<p><strong>Evidence required</strong></p><ul><li>The number of tests run and which results survive correction</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.outcome-switching">
+<h3>Outcome switched from registration</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The primary outcome or hypothesis in the paper differs from the registration, without disclosure.</p>
+<p><strong>Evidence required</strong></p><ul><li>Registry snapshot and paper side by side, with dates</li></ul>
+
+<p><strong>How to check it yourself:</strong> ClinicalTrials.gov history, OSF registries, COMPare</p>
+
+</section>
+<section class="guide-type" id="stats.unreported-outcomes">
+<h3>Outcomes measured but not reported</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Outcomes the protocol, registration or methods say were measured are missing from the results, with no explanation.</p>
+<p><strong>Evidence required</strong></p><ul><li>The protocol, registration or methods section listing the outcome</li><li>That the results and supplements do not report it</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Outcomes the reader would have liked that were never planned</li></ul>
+<p><strong>How to check it yourself:</strong> ClinicalTrials.gov history, OSF registries, COMPare</p>
+
+</section>
+<section class="guide-type" id="stats.meta-analysis-error">
+<h3>Meta-analysis counts or extracts wrongly</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>A meta-analysis counts the same participants or study twice, takes effect sizes or variances from the wrong place, mixes incompatible measures, or includes studies its own criteria exclude.</p>
+<p><strong>Evidence required</strong></p><ul><li>The included studies concerned, with the numbers the meta-analysis used and the numbers in the source</li><li>The pooled estimate recomputed without the error, where possible</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Disagreement with the inclusion criteria themselves</li></ul>
+
+
+</section>
+<section class="guide-type" id="stats.post-hoc-hypothesis">
+<h3>After-the-fact hypothesis presented as planned</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A hypothesis formed after seeing results is presented as tested in advance.</p>
+<p><strong>Evidence required</strong></p><ul><li>An earlier version, preprint or registration with a different hypothesis</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.circular-analysis">
+<h3>Circular analysis or data leakage</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>The same data select and test the effect, or test data leak into training, so the result is built in.</p>
+<p><strong>Evidence required</strong></p><ul><li>The step where selection and testing share data, or where leakage occurs</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.misread-null">
+<h3>&quot;No significant difference&quot; read as &quot;no effect&quot;</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A non-significant result is presented as showing that there is no effect or that groups are equal.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, and the confidence interval showing meaningful effects remain possible</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.misleading-effect">
+<h3>Misleading effect size</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>The effect is presented in a way that misleads about its size, such as relative risk without absolute risk.</p>
+<p><strong>Evidence required</strong></p><ul><li>The presented figure and the plain figure from the same data</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.aggregation-error">
+<h3>Aggregation error</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A group-level pattern is claimed for individuals, or a pattern reverses when the data are split or combined (ecological fallacy, Simpson&#39;s paradox).</p>
+<p><strong>Evidence required</strong></p><ul><li>The level of the data and the level of the claim, or the reversed pattern shown</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.regression-to-mean">
+<h3>Regression to the mean read as an effect</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Units selected for extreme values are re-measured, and their natural drift back is presented as an effect.</p>
+<p><strong>Evidence required</strong></p><ul><li>The selection on extreme values and the absence of a comparison group</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="stats.code-error">
+<h3>Calculation or code error</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>A specific error in calculation or analysis code changes the reported results.</p>
+<p><strong>Evidence required</strong></p><ul><li>The error located in the authors&#39; code or calculation, and the corrected result</li></ul>
+
+
+
+</section>
+</section>
+<section id="reasoning">
+<h2>Reasoning and conclusions</h2>
+<p class="lead">Do the conclusions follow from the results?</p>
+
+<section class="guide-type" id="reasoning.unsupported-conclusion">
+<h3>Conclusion goes beyond the results</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The abstract or conclusion claims more than the results show.</p>
+<p><strong>Evidence required</strong></p><ul><li>The conclusion and the relevant result side by side</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Error in Results and/or Conclusions.</p>
+</section>
+<section class="guide-type" id="reasoning.spin">
+<h3>Title or abstract reports a different result</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The title or abstract presents a secondary, subgroup or within-group finding as the main result, or leaves out a primary result that did not support the hypothesis.</p>
+<p><strong>Evidence required</strong></p><ul><li>The title or abstract and the primary result in the paper, side by side</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Wording that is enthusiastic but matches the results</li></ul>
+
+
+</section>
+<section class="guide-type" id="reasoning.overgeneralisation">
+<h3>Overgeneralisation</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Results are extended beyond the population, species, setting or conditions studied (for example mice to humans) without evidence.</p>
+<p><strong>Evidence required</strong></p><ul><li>The generalising claim and the conditions actually studied</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="reasoning.causal-from-correlation">
+<h3>Cause claimed from correlation</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A causal conclusion is drawn from a design that can show only association.</p>
+<p><strong>Evidence required</strong></p><ul><li>The causal wording, quoted, and the design</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="reasoning.internal-contradiction">
+<h3>Paper contradicts itself</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The abstract, text, tables or figures state incompatible things.</p>
+<p><strong>Evidence required</strong></p><ul><li>The contradicting passages, quoted with locations</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="reasoning.invalid-argument">
+<h3>Invalid argument</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The conclusion does not follow logically from its premises (circular reasoning, false dichotomy, affirming the consequent).</p>
+<p><strong>Evidence required</strong></p><ul><li>Premises and conclusion, quoted, and where the logic breaks</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="reasoning.derivation-error">
+<h3>Error in derivation or proof</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>A mathematical or theoretical derivation contains an error that the result depends on.</p>
+<p><strong>Evidence required</strong></p><ul><li>The faulty step, and a counterexample or the corrected derivation</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="reasoning.ignores-direct-evidence">
+<h3>Ignores directly contrary evidence</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>The paper claims novelty or consensus while omitting earlier published work that directly tested the same question with a different result.</p>
+<p><strong>Evidence required</strong></p><ul><li>The earlier work, published before submission, on the same question</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Work the proposer finds relevant that does not test the same question</li></ul>
+
+
+</section>
+</section>
+<section id="sources">
+<h2>Sources and citations</h2>
+<p class="lead">Does it rest on sound, correctly cited work?</p>
+
+<section class="guide-type" id="sources.miscited">
+<h3>Source does not say what is claimed</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A cited source is used for a claim it does not make, so the error enters the literature under the source&#39;s authority.</p>
+<p><strong>Evidence required</strong></p><ul><li>The citing sentence, and the relevant passages of the cited source</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="sources.rests-on-flagged">
+<h3>Key claim rests on flagged work</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A key claim depends on work that is retracted or flagged Critical or Major. Citing flagged work in passing does not qualify.</p>
+<p><strong>Evidence required</strong></p><ul><li>The key claim, and how it depends on the flagged work</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Cites Retracted Work.</p>
+</section>
+<section class="guide-type" id="sources.phantom-reference">
+<h3>Reference does not exist</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>Cited works cannot be found and appear not to exist.</p>
+<p><strong>Evidence required</strong></p><ul><li>Each reference, with the failed lookups (DOI, catalogue, publisher)</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="sources.unreliable-source">
+<h3>Key claim rests on an unreliable source</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>A key claim relies on a withdrawn preprint, a hijacked journal or another source without genuine review, presented as established.</p>
+<p><strong>Evidence required</strong></p><ul><li>The claim, the source, and documentation of the source&#39;s status</li></ul>
+
+<p><strong>How to check it yourself:</strong> Retraction Watch Hijacked Journal Checker</p>
+
+</section>
+<section class="guide-type" id="sources.citation-padding">
+<h3>Irrelevant citations</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>Many citations are unrelated to the content, as seen in citation cartels and coercive citation.</p>
+<p><strong>Evidence required</strong></p><ul><li>Each irrelevant citation, and why it is unrelated to the citing text</li></ul>
+
+
+
+</section>
+</section>
+<section id="transparency">
+<h2>Transparency and reproducibility</h2>
+<p class="lead">Can others check and repeat it?</p>
+
+<section class="guide-type" id="transparency.failed-replication">
+<h3>Failed replication</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Independent, adequately powered replications following the original method did not find the result.</p>
+<p><strong>Evidence required</strong></p><ul><li>The replication(s), linked, with their power and protocol</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>One underpowered replication, or one with a different method</li></ul>
+
+<p class="hint">Also imported from retraction notices giving the reason: Results Not Reproducible.</p>
+</section>
+<section class="guide-type" id="transparency.failed-reproduction">
+<h3>Results not reproduced from the same data</h3>
+<p><span class="chip chip-major">Major</span> <span class="chip chip-critical">Critical</span></p>
+<p>Re-running the reported analysis on the authors&#39; own data does not give the reported results.</p>
+<p><strong>Evidence required</strong></p><ul><li>The data and code used, and the differing results</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="transparency.not-robust">
+<h3>Result depends on arbitrary choices</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>The result disappears under reasonable alternative analysis choices.</p>
+<p><strong>Evidence required</strong></p><ul><li>The alternatives run, and why each is as reasonable as the original</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="transparency.data-unavailable">
+<h3>Data or code unavailable</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>Data or code the paper says are available are not, or were refused on request for a key claim.</p>
+<p><strong>Evidence required</strong></p><ul><li>The availability statement, and dated requests or failed links (names removed)</li></ul>
+
+
+<p class="hint">Also imported from retraction notices giving the reason: Original Data and/or Images not Provided and/or not Available.</p>
+</section>
+<section class="guide-type" id="transparency.methods-insufficient">
+<h3>Methods too vague to repeat</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>The methods lack details needed to repeat the study.</p>
+<p><strong>Evidence required</strong></p><ul><li>The missing details, listed</li></ul>
+
+
+
+</section>
+</section>
+<section id="interests">
+<h2>Conflicts of interest</h2>
+<p class="lead">Who had a stake, and was it disclosed?</p>
+<p class="notice">A conflict of interest does not make a result wrong. It raises the risk, so these flags are Caution unless the interested party controlled the work.</p>
+<section class="guide-type" id="interests.undisclosed-financial">
+<h3>Undisclosed financial interest</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>Authors had funding, employment, equity, patents or payments linked to the result and did not disclose them.</p>
+<p><strong>Evidence required</strong></p><ul><li>Documentary proof (funding records, patents, company filings, disclosures in other papers of the same period)</li><li>The paper&#39;s own disclosure statement</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="interests.undisclosed-nonfinancial">
+<h3>Undisclosed non-financial interest</h3>
+<p><span class="chip chip-caution">Caution</span></p>
+<p>Authors evaluated their own product or method, or held a documented formal role tied to the outcome, and did not disclose it.</p>
+<p><strong>Evidence required</strong></p><ul><li>Documentary proof of the role or ownership, and the disclosure statement</li></ul>
+<p><strong>Not enough on its own</strong></p><ul><li>Inferred beliefs, politics or personal views</li></ul>
+
+
+</section>
+<section class="guide-type" id="interests.funder-control">
+<h3>Funder controlled the study</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>A party with a stake in the result controlled the design, analysis or decision to publish.</p>
+<p><strong>Evidence required</strong></p><ul><li>A contract, protocol, correspondence or official statement showing the control</li></ul>
+
+
+
+</section>
+</section>
+<section id="notices">
+<h2>Official notices</h2>
+<p class="lead">What have the journal or publisher said?</p>
+
+<section class="guide-type" id="notices.retracted">
+<h3>Retracted</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-critical">Critical</span></p>
+<p>The paper has been retracted. A retraction whose only reasons do not concern the validity of the work (retract-and-replace, a publisher&#39;s error, withdrawal to publish elsewhere) is Caution.</p>
+<p><strong>Source</strong></p><ul><li>The retraction notice</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="notices.expression-of-concern">
+<h3>Expression of concern</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The publisher has formally questioned the paper&#39;s reliability.</p>
+<p><strong>Source</strong></p><ul><li>The notice</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="notices.major-correction">
+<h3>Correction affecting conclusions</h3>
+<p><span class="chip chip-caution">Caution</span> <span class="chip chip-major">Major</span></p>
+<p>A published correction changes results or conclusions.</p>
+<p><strong>Source</strong></p><ul><li>The correction</li><li>and what it changes</li></ul>
+
+
+
+</section>
+<section class="guide-type" id="notices.withdrawn-preprint">
+<h3>Withdrawn preprint</h3>
+<p><span class="chip chip-major">Major</span></p>
+<p>The authors or server withdrew the preprint.</p>
+<p><strong>Source</strong></p><ul><li>The withdrawal notice</li></ul>
+
+
+
+</section>
+</section>
+<h2 id="out-of-scope">Deliberately not flagged</h2>
+<ul><li>Motives, politics or ideology of authors. Only their visible effects on the work are flaggable.</li><li>Disagreeing with consensus, novelty or unpopular conclusions. Contradicting accepted views is not an error.</li><li>People. Flags attach to papers and claims, never to authors, labs or institutions.</li><li>Writing quality, typos and copied wording without copied data or results.</li><li>Ethics violations that do not affect validity. These belong with the institution or journal.</li><li>Journal prestige or impact factor.</li></ul>
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+
+</body>
+</html>

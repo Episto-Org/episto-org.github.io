@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>My account · Episto</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="../index.html">Check</a></li><li><a href="../browse.html">Browse</a></li><li><a href="../guide.html">Flag guide</a></li><li><a href="../download.html">Download</a></li><li><a href="../about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<nav class="member-tools" aria-label="Member tools"><ul><li><a href="propose.html">Propose a flag</a></li><li><a href="review.html">Sealed review</a></li><li><a href="join.html">Join</a></li><li><a href="account.html" aria-current="page">My account</a></li></ul></nav>
+<h1>My account</h1>
+<p class="lead">Your review pools, inviting someone, and requests to the steward. Everything happens in your browser.</p>
+
+<div id="explainer"></div>
+
+<section class="panel stack">
+  <h2>1. Your entry</h2>
+  <label for="current">Paste your entry from the members list</label> <a id="members-link" hidden>Open the members list</a>
+  <textarea id="current" class="medium" spellcheck="false" placeholder="  - pseudonym: ...&#10;    key: ssh-ed25519 ...&#10;    pools:&#10;      statistics: 2027-01-10"></textarea>
+  <p id="current-status" aria-live="polite"></p>
+  <div id="current-pools"></div>
+</section>
+
+<section id="change" class="panel stack" hidden>
+  <h2>2. Choose your pools</h2>
+  <div id="picker"></div>
+  <div id="changes" aria-live="polite"></div>
+</section>
+
+<section id="account-out" class="panel stack" hidden>
+  <h2>3. Your updated entry</h2>
+  <pre id="entry"></pre>
+  <div class="row"><button type="button" id="copy-entry">Copy</button></div>
+  <ol id="next-steps" class="stack"></ol>
+</section>
+
+<section class="panel stack">
+  <h2>Your Episto password</h2>
+  <p>Inviting and the requests below are sealed with your password. Your pseudonym and password stay in this browser.</p>
+  <div>
+    <label for="me">Pseudonym</label>
+    <input type="text" id="me" autocomplete="username" spellcheck="false">
+  </div>
+  <div>
+    <label for="my-password">Episto password</label>
+    <input type="password" id="my-password" autocomplete="current-password" spellcheck="false">
+  </div>
+  <div class="row"><button type="button" id="unlock" class="primary">Unlock</button></div>
+  <p id="unlock-status" aria-live="polite"></p>
+</section>
+
+<section id="invite" class="panel stack" hidden>
+  <h2>Invite someone</h2>
+  <div>
+    <label for="reply">Their invitation reply</label> <span class="hint">What the join page gave them.</span>
+    <textarea id="reply" class="medium" spellcheck="false"></textarea>
+  </div>
+  <div>
+    <label for="members-now">The members list as it is now</label> <span class="hint">Open <code>members.yaml</code> in the members' repository, choose Raw, and copy all of it.</span>
+    <textarea id="members-now" class="medium" spellcheck="false"></textarea>
+  </div>
+  <div class="row"><button type="button" id="prepare-invite">Prepare the invitation</button></div>
+  <p id="invite-status" aria-live="polite"></p>
+  <div id="invite-out" class="stack"></div>
+</section>
+
+<section id="requests" class="panel stack" hidden>
+  <h2>Other requests</h2>
+  <div>
+    <label for="op">Request</label>
+    <select id="op">
+      <option value="authorize">Authorize my change to the members list</option>
+      <option value="login">Register another GitHub username</option>
+      <option value="unlogin">Remove a GitHub username</option>
+      <option value="volunteer">Volunteer for a project</option>
+      <option value="invite-request">Ask for an extra invitation for a pool</option>
+      <option value="away">I'm away (not drawn until I return)</option>
+      <option value="back">I'm back</option>
+      <option value="stand">I stand for librarian (when a draw is open)</option>
+      <option value="contact">Someone contacted me about a case I review</option>
+    </select>
+  </div>
+  <div id="op-value-box">
+    <label for="op-value" id="op-value-label">Value</label>
+    <input type="text" id="op-value" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="op-scope-box">
+    <label for="op-scope">Project id</label> <span class="hint">Only for a login used for one project; leave empty otherwise.</span>
+    <input type="text" id="op-scope" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="op-about-box">
+    <label for="op-about">Who contacted you</label> <span class="hint">Their GitHub username or pseudonym, if you know it. Only the steward reads this, and it never tells them.</span>
+    <input type="text" id="op-about" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="op-members-box">
+    <label for="op-members">The members list exactly as your pull request will leave it</label> <span class="hint">After editing it on GitHub, open the file in your pull request, choose Raw, and copy all of it.</span>
+    <textarea id="op-members" class="medium" spellcheck="false"></textarea>
+  </div>
+  <div class="row"><button type="button" id="seal-request">Seal the request</button></div>
+  <p id="request-status" aria-live="polite"></p>
+  <div id="request-out" class="stack"></div>
+</section>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="../about.html">How flags are decided</a></li>
+<li><a href="../download.html">Download the data</a></li>
+<li><a href="../member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="../assets/js/account.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html" aria-current="page">Check</a></li><li><a href="browse.html">Browse</a></li><li><a href="guide.html">Flag guide</a></li><li><a href="download.html">Download</a></li><li><a href="about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>Check a reference list</h1>
+<p class="lead">Paste the references of a paper, a manuscript or a reading list. Each one is checked against retractions, official notices and flags verified by the Episto community.</p>
+
+<form id="check-form" class="panel stack" novalidate>
+  <div>
+    <label for="refs">References</label>
+    <span class="hint">Any citation style, BibTeX, RIS, or a list of DOIs.</span>
+    <textarea id="refs" name="refs" spellcheck="false" autocomplete="off" placeholder="1. Smith J, Lee K. Priming effects on walking speed. J Exp Psychol. 2014;12:45-67. doi:10.1000/example
+2. ..."></textarea>
+  </div>
+  <div class="row">
+    <label class="dropzone" id="dropzone" for="file">Drop a .bib, .ris or .txt file here, or choose one
+      <input id="file" type="file" accept=".bib,.ris,.txt,text/plain" class="visually-hidden">
+    </label>
+    <div>
+      <label for="year">Year of the citing paper</label> <span class="hint">(optional, shows citations made after a flag)</span><br>
+      <input id="year" type="number" min="1600" max="2100" inputmode="numeric" placeholder="2026">
+    </div>
+  </div>
+  <div class="row spread">
+    <p class="privacy"><span aria-hidden="true">&#128274;</span> Checked in your browser. Nothing you paste is sent anywhere.</p>
+    <div class="row">
+      <button type="button" id="example">Try an example</button>
+      <button type="submit" class="primary" id="run">Check references</button>
+    </div>
+  </div>
+</form>
+
+<div id="status" aria-live="polite"></div>
+
+<section id="report" hidden>
+  <div class="row spread">
+    <div class="summary" id="summary"></div>
+    <div class="row no-print">
+      <label class="check"><input type="checkbox" id="only-flagged" checked> Show flagged only</label>
+      <button type="button" id="copy">Copy report</button>
+      <button type="button" id="csv">Download CSV</button>
+      <button type="button" id="print">Print</button>
+    </div>
+  </div>
+  <p class="hint" id="hint"></p>
+  <ol class="results" id="results"></ol>
+</section>
+
+<section class="panel">
+  <h2>How to read the results</h2>
+  <table>
+    <tbody>
+      <tr><td><span class="chip chip-critical">Critical</span></td><td>The flagged result cannot be relied on at all, for example a retraction.</td></tr>
+      <tr><td><span class="chip chip-major">Major</span></td><td>The flagged conclusion is not supported as stated. Parts of the work may still hold.</td></tr>
+      <tr><td><span class="chip chip-caution">Caution</span></td><td>The result may hold, but should not be relied on without the stated limitation.</td></tr>
+      <tr><td><span class="chip chip-propagated">Builds on flagged work</span></td><td>Not flagged itself, but cites work flagged Critical or Major.</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Match confidence.</strong> <em>DOI match</em> is certain. <em>Title match</em> is very likely, but verify it. <em>Possible match</em> means most words of the title match; check it by hand. References without a DOI match less reliably, so add DOIs where you can.</p>
+  <p>A flag describes a specific problem with specific work. It is not a judgement of the authors, and citing flagged work can be legitimate, for example to discuss it.</p>
+</section>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="assets/js/check.js"></script>
+</body>
+</html>

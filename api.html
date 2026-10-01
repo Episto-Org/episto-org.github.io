@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>API · Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Check</a></li><li><a href="browse.html">Browse</a></li><li><a href="guide.html">Flag guide</a></li><li><a href="download.html">Download</a></li><li><a href="about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>API</h1>
+<p class="lead">Episto's data is a set of static files: no key, no account, no limit, and nothing about what you look up reaches us. Version 1 is described in <a href="data/api.json">data/api.json</a>; a later format gets a new version and v1 stays as documented here.</p>
+<h2>Every flagged paper at once</h2>
+<p>Download <a href="flagged-2026-10.csv.gz">flagged-2026-10.csv.gz</a> (gzip-compressed CSV, released monthly; the columns are on the <a href="download.html">download page</a>). Checking your own lists against it keeps them on your computer.</p>
+<pre>curl -O https://episto-org.github.io/episto-site/flagged-2026-10.csv.gz
+gunzip flagged-2026-10.csv.gz</pre>
+<h2>One paper by DOI</h2>
+<p>Each paper's record sits in <code>data/papers/&lt;xx&gt;.json</code>, where <code>xx</code> is the first byte, in hex, of the 32-bit FNV-1a hash of its id, <code>doi:</code> followed by the lower-case DOI.</p>
+<pre>function shardOf(id) {
+  let h = 0x811c9dc5;
+  for (const b of new TextEncoder().encode(id)) {
+    h ^= b;
+    h = Math.imul(h, 0x01000193) &gt;&gt;&gt; 0;
+  }
+  return (h &gt;&gt;&gt; 24).toString(16).padStart(2, '0');
+}
+const id = 'doi:' + doi.toLowerCase();
+const shard = await (await fetch('https://episto-org.github.io/episto-site/data/papers/' + shardOf(id) + '.json')).json();
+const paper = shard[id] ?? null;   // null: not flagged</pre>
+<h2>A whole reference list</h2>
+<p>Libraries and journals can check a reference list from the command line with the same matching as the checker (DOIs, then titles):</p>
+<pre>node tools/check-list.mjs references.txt --data https://episto-org.github.io/episto-site/data --out results.csv</pre>
+<p>The script is in Episto's code, Apache-2.0. Published data is CC0: use it for anything, with no permission needed.</p>
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+
+</body>
+</html>

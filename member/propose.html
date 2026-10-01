@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39; https://api.crossref.org; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Propose a flag · Episto</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="../index.html">Check</a></li><li><a href="../browse.html">Browse</a></li><li><a href="../guide.html">Flag guide</a></li><li><a href="../download.html">Download</a></li><li><a href="../about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<nav class="member-tools" aria-label="Member tools"><ul><li><a href="propose.html" aria-current="page">Propose a flag</a></li><li><a href="review.html">Sealed review</a></li><li><a href="join.html">Join</a></li><li><a href="account.html">My account</a></li></ul></nav>
+<h1>Propose a flag</h1>
+<p class="lead">Fill in the steps. The page writes the flag file for you; nothing leaves your browser except an optional DOI lookup at Crossref.</p>
+<p class="notice">Before you start: read the <a href="../guide.html">flag guide</a> for the type you have in mind, and strip metadata from every evidence file (for example with mat2). See ONBOARDING.md in the members' repository.</p>
+
+<form id="builder" class="stack" novalidate>
+<ol class="steps">
+  <li class="panel">
+    <h2>The paper</h2>
+    <div class="row">
+      <div><label for="doi">DOI</label><br><input id="doi" type="text" size="34" placeholder="10.1234/abcd.5678" autocomplete="off" spellcheck="false"></div>
+      <button type="button" id="lookup">Look up at Crossref</button>
+    </div>
+    <p class="hint" id="lookup-status"></p>
+    <div><label for="title">Title</label><input id="title" type="text" class="wide"></div>
+    <div><label for="authors">Authors</label> <span class="hint">one per line</span><textarea id="authors" class="short"></textarea></div>
+    <div class="row">
+      <div><label for="year">Year</label><br><input id="year" type="number" min="1600" max="2100"></div>
+      <div class="grow"><label for="journal">Journal</label><br><input id="journal" type="text" class="wide"></div>
+    </div>
+    <div><label for="field">Field</label> <span class="hint">decides who can be drawn to review</span><br><select id="field"></select></div>
+    <div><label for="design">Study design</label> <span class="hint">optional; a qualitative study is reviewed by qualitative methods reviewers instead of statisticians</span><br>
+      <select id="design"><option value="">Not stated</option><option value="quantitative">Quantitative</option><option value="qualitative">Qualitative</option><option value="mixed">Mixed methods</option></select></div>
+  </li>
+
+  <li class="panel">
+    <h2>What is wrong</h2>
+    <div id="categories" class="tiles" role="radiogroup" aria-label="Category"></div>
+    <div id="types"></div>
+    <div id="type-info"></div>
+  </li>
+
+  <li class="panel">
+    <h2>What it covers</h2>
+    <div class="row">
+      <div><label for="scope">Scope</label><br>
+        <select id="scope">
+          <option value="whole-paper">Whole paper</option>
+          <option value="claim">A claim (quote it)</option>
+          <option value="figure">A figure</option>
+          <option value="table">A table</option>
+          <option value="dataset">A dataset</option>
+        </select>
+      </div>
+      <div class="grow" id="scope-ref-box" hidden><label for="scope-ref" id="scope-ref-label">Reference</label><br><input id="scope-ref" type="text" class="wide"></div>
+    </div>
+  </li>
+
+  <li class="panel">
+    <h2>Evidence</h2>
+    <p class="hint">Answer each required item. Put evidence files in the folder shown below and list their names here.</p>
+    <div id="evidence"></div>
+  </li>
+
+  <li class="panel">
+    <h2>Summary</h2>
+    <p class="hint">Plain language: what is wrong, where, and why it matters. Describe the work, never the people.</p>
+    <textarea id="summary" class="short"></textarea>
+    <p class="hint" id="summary-count"></p>
+  </li>
+
+  <li class="panel">
+    <h2>Check and create</h2>
+    <div id="pseudonym-box"><label for="pseudonym">Your pseudonym</label><br><input id="pseudonym" type="text" autocomplete="off" spellcheck="false"></div>
+    <div id="problems" aria-live="polite"></div>
+    <div id="output" hidden class="stack">
+      <p>File: <code id="out-path"></code></p>
+      <p>Evidence files go in: <code id="out-evidence"></code></p>
+      <pre id="out-yaml"></pre>
+      <div class="row">
+        <button type="button" id="copy-yaml">Copy</button>
+        <button type="button" id="download-yaml">Download</button>
+        <a class="button" id="open-forge" rel="noopener noreferrer">Create it in the repository</a>
+      </div>
+      <p class="hint">Then open a pull request from that branch. The steward checks it within the hour and tells you if anything is missing.</p>
+    </div>
+  </li>
+</ol>
+</form>
+
+<section class="panel">
+  <h2>Opening a new round on an existing flag</h2>
+  <p>Disputes, re-proposals, authors' responses and outside events change the existing flag file: add a <code>request</code> block and append new evidence entries with the next round number. Nothing else in the file may change. Example:</p>
+<pre>request:
+  trigger: dispute          # or reproposal, author-response, outside-event
+  by: your-pseudonym        # leave out when logins are sealed
+  argument: What the new evidence shows and why it changes the outcome.
+  # outside_event: { kind: replication, url: https://... }   (outside-event only)
+evidence:
+  # ...existing entries unchanged...
+  - item: 1
+    round: 2
+    text: The new evidence.
+    urls: [https://example.org/new-evidence]</pre>
+</section>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="../about.html">How flags are decided</a></li>
+<li><a href="../download.html">Download the data</a></li>
+<li><a href="../member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="../assets/js/propose.js"></script>
+</body>
+</html>

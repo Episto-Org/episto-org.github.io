@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>About · Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Check</a></li><li><a href="browse.html">Browse</a></li><li><a href="guide.html">Flag guide</a></li><li><a href="download.html">Download</a></li><li><a href="about.html" aria-current="page">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>About Episto</h1>
+<p class="lead">Errors compound when flawed papers are cited as if they were sound. Episto lets anyone check a reference list against retractions and against problems verified by a community of reviewers.</p>
+
+<h2>Where the flags come from</h2>
+<ul>
+<li><strong>Official notices.</strong> Retractions, expressions of concern and corrections from the Retraction Watch database, which Crossref publishes openly. Imported every month.</li>
+<li><strong>Community flags.</strong> Problems that official notices do not cover: impossible numbers, failed replications, undisclosed conflicts of interest and more. See the <a href="guide.html">flag guide</a>.</li>
+<li><strong>Builds on flagged work.</strong> Computed from reference lists contributed to Episto: papers that cite work flagged Critical or Major.</li>
+</ul>
+
+<h2>How a community flag is decided</h2>
+<ol>
+<li>A member proposes a flag with evidence that anyone can check.</li>
+<li>For 14 days, other members may ask about the evidence.</li>
+<li>A panel of reviewers is drawn by lottery from members in the paper's field. The draw uses a public random beacon (drand), so anyone can recompute it and nobody can steer it.</li>
+<li>Each reviewer judges the evidence alone and first posts only a sealed fingerprint of their verdict. When all have sealed, they reveal. Nobody sees another verdict before giving their own.</li>
+<li>The flag is published only if enough reviewers find that it holds.</li>
+</ol>
+
+<h2>Rounds, and why a flag cannot bounce back and forth</h2>
+<p>A flag can be disputed with new evidence. Each later round needs a larger panel and a larger majority to change the result, and after round 3 the case is settled. A settled case reopens only through an outside event: a retraction or correction, a published replication, or the authors releasing their data.</p>
+<div class="table-scroll"><table><thead><tr><th>Round</th><th>Panel</th><th>Needed to change the status</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>3 of 3</td></tr><tr><td>2</td><td>5</td><td>4 of 5</td></tr><tr><td>3</td><td>7</td><td>5 of 7</td></tr>
+<tr><td>Settled</td><td>7</td><td>5 of 7, outside events only</td></tr></tbody></table></div>
+<p>Between rounds there is a cooldown of 6 months.</p>
+
+<h2>What is never flagged</h2>
+<p>Authors' motives or politics, disagreement with consensus, and people. See the <a href="guide.html#out-of-scope">full list</a>.</p>
+
+<h2>For authors</h2>
+<p>If a flag concerns your work, you can send a response. It is linked from the paper's page, and a first response with new evidence can open a new round without waiting for the cooldown.</p>
+
+<h2>Privacy</h2>
+<p>This site sets no cookies and runs no analytics. The reference checker runs entirely in your browser; nothing you paste is sent anywhere. Reviewers are pseudonymous, and pages never name them.</p>
+
+<h2 id="track-record">Track record</h2>
+<p>Numbers, not reputations. Every share is shown with what it is a share of.</p>
+<h3>Community flags</h3>
+<ul>
+<li>0 cases decided: 0 flags verified, 0 proposals rejected, 0 flags withdrawn after a dispute.</li>
+<li>Verified flags by severity: 0 Critical, 0 Major, 0 Caution.</li>
+<li>0 of 0 verified flags were later followed by an official notice (retraction, expression of concern or correction) on the same paper.</li>
+</ul>
+<h3>Official notices (Retraction Watch)</h3>
+<p>72,790 notices on 70,008 papers: 67,363 retraction, 3,727 expression of concern, 1,538 correction, 162 reinstatement.</p>
+<div class="table-scroll"><table><thead><tr><th>Year</th><th>Retractions</th></tr></thead><tbody><tr><td>2017</td><td>1,712</td></tr><tr><td>2018</td><td>2,534</td></tr><tr><td>2019</td><td>2,907</td></tr><tr><td>2020</td><td>3,080</td></tr><tr><td>2021</td><td>3,908</td></tr><tr><td>2022</td><td>5,591</td></tr><tr><td>2023</td><td>13,228</td></tr><tr><td>2024</td><td>6,427</td></tr><tr><td>2025</td><td>5,954</td></tr><tr><td>2026</td><td>1,869</td></tr></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>Most common reasons given for retractions</th><th>Retractions</th></tr></thead><tbody><tr><td>Unreliable Results and/or Conclusions</td><td>22,030</td></tr><tr><td>Concerns/Issues about Referencing/Attributions</td><td>15,083</td></tr><tr><td>Concerns/Issues about Data</td><td>14,368</td></tr><tr><td>Paper Mill</td><td>11,712</td></tr><tr><td>Concerns/Issues about Peer Review</td><td>11,447</td></tr><tr><td>Compromised Peer Review</td><td>11,255</td></tr><tr><td>Computer-Aided Content or Computer-Generated Content</td><td>9,336</td></tr><tr><td>Concerns/Issues about Results and/or Conclusions</td><td>9,284</td></tr></tbody></table></div>
+<h3>Projects</h3>
+<p>No projects yet. They switch on when enough members are active.</p>
+<h3>Compounding</h3>
+<p>0 reference lists contributed; 0 of those papers cite work flagged Critical or Major; 0 flagged papers are cited by them.</p>
+
+<h2>Licences</h2>
+<p>Code: Apache-2.0. Documentation and flag taxonomy: CC BY 4.0, credited to "Episto contributors". Community flag data: CC0. Imported notices remain under the terms of their source.</p>
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+
+</body>
+</html>

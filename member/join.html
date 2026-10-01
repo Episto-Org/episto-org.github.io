@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Join · Episto</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="../index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="../index.html">Check</a></li><li><a href="../browse.html">Browse</a></li><li><a href="../guide.html">Flag guide</a></li><li><a href="../download.html">Download</a></li><li><a href="../about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<nav class="member-tools" aria-label="Member tools"><ul><li><a href="propose.html">Propose a flag</a></li><li><a href="review.html">Sealed review</a></li><li><a href="join.html" aria-current="page">Join</a></li><li><a href="account.html">My account</a></li></ul></nav>
+<h1>Join</h1>
+<p class="lead">Membership is by invitation. This page writes your entry for the members list. It asks for no name, email, address or phone number, and nothing you type leaves your browser.</p>
+
+<div id="explainer"></div>
+
+<form id="join-form" class="panel stack" novalidate>
+  <h2>1. About you</h2>
+  <div>
+    <label for="pseudonym">Pseudonym</label> <span class="hint">3-32 lower-case letters, digits and hyphens. Not your name, and not a name you use anywhere else.</span>
+    <input type="text" id="pseudonym" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label for="inviter">Your inviter's pseudonym</label>
+    <input type="text" id="inviter" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label for="forge">GitHub username</label> <span class="hint">An account made only for Episto, with two-step verification on. Not your usual one.</span>
+    <input type="text" id="forge" autocomplete="off" spellcheck="false">
+  </div>
+  <div>
+    <label for="password">Episto password</label> <span class="hint">At least 16 characters. It seals everything you do in Episto, so a stolen GitHub account cannot act as you. It cannot be recovered: write it down somewhere safe.</span>
+    <input type="password" id="password" autocomplete="new-password" spellcheck="false">
+    <div class="row"><button type="button" id="suggest">Suggest a password</button> <code id="suggested"></code></div>
+  </div>
+  <div>
+    <label for="password2">Password again</label>
+    <input type="password" id="password2" autocomplete="new-password" spellcheck="false">
+  </div>
+
+  <h2>2. Review pools</h2>
+  <p>Choose what you can judge well. Choices made in your first days count at once, so it is worth choosing now.</p>
+  <div id="picker"></div>
+
+  <p id="join-problems" aria-live="polite"></p>
+  <button type="submit" class="primary">Write my entry</button>
+</form>
+
+<section id="join-out" class="panel stack" hidden>
+  <h2>3. Your invitation reply</h2>
+  <p>Your entry for the members list, with the public half of your password seal, and your GitHub username sealed so only the steward can read it.</p>
+  <pre id="entry"></pre>
+  <div class="row"><button type="button" id="copy-entry">Copy</button><button type="button" id="save-entry">Download</button></div>
+  <h2>4. What happens next</h2>
+  <ol id="next-steps" class="stack"></ol>
+</section>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="../about.html">How flags are decided</a></li>
+<li><a href="../download.html">Download the data</a></li>
+<li><a href="../member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+<script type="module" src="../assets/js/join.js"></script>
+</body>
+</html>

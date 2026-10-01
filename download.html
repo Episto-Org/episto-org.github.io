@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; connect-src &#39;self&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Check a reference list for retracted and flawed research.">
+<title>Download · Episto</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l7 13H1z' fill='%23b4520a'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html">Episto</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Check</a></li><li><a href="browse.html">Browse</a></li><li><a href="guide.html">Flag guide</a></li><li><a href="download.html" aria-current="page">Download</a></li><li><a href="about.html">About</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<h1>Download the data</h1>
+<p class="lead">The full list of flags, updated monthly. Released 2026-10-01.</p>
+<div class="panel stack">
+<p><a class="button" href="flagged-2026-10.csv.gz" download>Download flagged-2026-10.csv.gz</a></p>
+<p>Gzip-compressed CSV: unzip it, or open it directly in R, Python or most data tools. SHA-256 of the CSV: <code>2c308a126afd957f32a9d6cd63767532dc1c0688cc97523b3bd34a818ea6faeb</code> (<a href="flagged-2026-10.csv.sha256">checksum file</a>, which also lists the compressed file's). For other tools, see the <a href="api.html">API</a>.</p>
+
+</div>
+<h2>This release</h2>
+<ul>
+<li>70,008 papers</li>
+<li>128,340 official notices and imported reasons</li>
+<li>0 community flags</li>
+<li>0 papers that build on flagged work</li>
+</ul>
+<h2>Columns</h2>
+<div class="table-scroll"><table><thead><tr><th>Column</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>id</td><td>"doi:&lt;doi&gt;", or "rw:&lt;record&gt;" for notices without a usable DOI</td></tr>
+<tr><td>doi, title, authors, year, journal</td><td>The flagged paper. Lists are separated by "|".</td></tr>
+<tr><td>domains, field</td><td>Research domain(s) and, for community flags, the field</td></tr>
+<tr><td>category, type</td><td>The flag type; see the flag guide</td></tr>
+<tr><td>severity</td><td>critical, major, caution, or propagated</td></tr>
+<tr><td>scope, scope_ref</td><td>What the flag covers: whole-paper, claim, figure, table or dataset</td></tr>
+<tr><td>summary</td><td>Plain-language description of the problem</td></tr>
+<tr><td>status</td><td>official, verified, withdrawn, or computed</td></tr>
+<tr><td>round, panel_size, votes_holds, decided</td><td>For community flags: the deciding round, panel size, reviewers who found the flag holds, and the date</td></tr>
+<tr><td>source</td><td>retraction-watch, community or computed. Rows keep their source's terms.</td></tr>
+<tr><td>evidence_urls</td><td>Links to the evidence, separated by "|"</td></tr>
+<tr><td>paper_url, taxonomy_version</td><td>The paper's page on this site, and the taxonomy version used</td></tr>
+</tbody></table></div>
+<p class="hint">Cells that a spreadsheet would run as a formula start with an apostrophe.</p>
+<h2>Earlier releases</h2>
+<p class="hint">Earlier releases will be listed here.</p>
+</div></main>
+<footer class="site"><div class="wrap">
+<p>Episto flags specific problems with specific research, decided by randomly drawn panels of pseudonymous reviewers. Flags are not judgements of people.</p>
+<ul>
+<li><a href="about.html">How flags are decided</a></li>
+<li><a href="download.html">Download the data</a></li>
+<li><a href="member/propose.html">Member tools</a></li>
+
+</ul>
+</div></footer>
+
+</body>
+</html>

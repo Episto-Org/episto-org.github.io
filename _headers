@@ -1,0 +1,12 @@
+/*
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'none'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/data/*
+  Access-Control-Allow-Origin: *
+
+/flagged-*
+  Access-Control-Allow-Origin: *
