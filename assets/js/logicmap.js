@@ -27,9 +27,10 @@ function textOf(step) {
  * @param opts.failLabel the flag type's label, for the failure node
  * @param opts.selected node id to highlight ("1", "E2")
  * @param opts.onSelect called with a node id when a node is chosen
+ * @param opts.help show the (?) that explains it (the builder has its own)
  * @returns an element: the map, the line of logic, and a key
  */
-export function logicMap(steps, { failLabel = 'Failure', selected = null, onSelect = null } = {}) {
+export function logicMap(steps, { failLabel = 'Failure', selected = null, onSelect = null, help = true } = {}) {
   const edges = edgesOf(steps);
   const ids = [...steps.map((_, i) => String(i + 1)), ...new Set(edges.flatMap((e) => [e.from, e.to]).filter((id) => id.startsWith('E')))];
   const center = centerOf(steps, edges) ?? ids[0];
@@ -105,7 +106,32 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
       s.where ? h('span', { class: 'hint' }, ` · ${s.where}`) : null,
       id === center ? h('span', { class: 'hint' }, ' · load-bearing') : falls.has(id) ? h('span', { class: 'hint' }, ' · falls with it') : null);
   }));
-  return h('div', { class: 'logic-map-box stack' }, map, h('p', { class: 'logic-line' }, h('code', null, notation(steps, edges))), key);
+  return h('div', { class: 'logic-map-box stack' }, help ? logicHelp() : null, map, h('p', { class: 'logic-line' }, h('code', null, notation(steps, edges))), key);
+}
+
+/**
+ * The small (?) that explains why a logic tree, and says plainly that it
+ * is open data anyone may use, machine-learning companies included.
+ */
+export function logicHelp() {
+  return h('details', { class: 'help' },
+    h('summary', { 'aria-label': 'What logic trees are, and what they open up' }, '?'),
+    h('div', { class: 'stack' },
+      h('p', null, h('strong', null, 'A logic tree '), 'shows how an argument is built: the claim at its centre, what holds it up, where the flag lands, and what depends on it. It is written in the proposer\'s own words, so it gives the context without the paper\'s text.'),
+      h('p', null, h('strong', null, 'Open to everyone. '), 'Every tree is published under CC0 in the monthly download (data/meta/), for anyone to use: researchers, libraries, educators, and companies that build machine-learning models.'),
+      h('p', null, h('strong', null, 'Close at hand:')),
+      h('ul', null,
+        h('li', null, 'seeing at a glance which claims a study rests on, and which papers it builds on;'),
+        h('li', null, 'linking related work through the claims papers share;'),
+        h('li', null, 'teaching how arguments are built, with real examples;'),
+        h('li', null, 'meta-research on how evidence and conclusions connect across fields.')),
+      h('p', null, h('strong', null, 'Further out:')),
+      h('ul', null,
+        h('li', null, 'models that read an argument\'s structure, not just its words;'),
+        h('li', null, 'writing assistants that show authors how their conclusions hang together as they write;'),
+        h('li', null, 'a map of how knowledge builds on knowledge, that updates as evidence comes in;'),
+        h('li', null, 'a literature that corrects itself faster, because each claim carries its links.')),
+      h('p', { class: 'hint' }, 'Trees carry no personal data: not who proposed or reviewed a flag, nor how anyone voted.')));
 }
 
 /** Step numbers a step may point to, by role. */

@@ -1,6 +1,6 @@
 // The flag builder: a form that writes a valid flag file.
 
-import { logicMap, targetsFor } from './logicmap.js';
+import { logicMap, logicHelp, targetsFor } from './logicmap.js';
 import { normalizeDoi, doiSlug } from '../lib/doi.js';
 import { h, $, clear, severityChip, download } from './dom.js';
 import { loadTaxonomy } from './data.js';
@@ -216,6 +216,7 @@ function refreshLogic(arrows = true) {
     box.append(logicMap(steps, {
       failLabel: current?.label ?? 'Failure',
       selected: selectedStep,
+      help: false,
       onSelect: (id) => {
         selectedStep = id;
         refreshLogic(false);
@@ -353,6 +354,7 @@ async function init() {
   $('#lookup').addEventListener('click', lookup);
   $('#builder').addEventListener('input', update);
   $('#builder').addEventListener('change', update);
+  $('#logic-help').replaceWith(logicHelp());
   for (const b of document.querySelectorAll('[data-step]')) b.addEventListener('click', () => addStep(b.dataset.step));
   $('#copy-yaml').addEventListener('click', () => navigator.clipboard.writeText($('#output').dataset.yaml));
   $('#download-yaml').addEventListener('click', () => download($('#output').dataset.path.split('/').pop(), $('#output').dataset.yaml, 'text/yaml'));
