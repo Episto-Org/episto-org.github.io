@@ -60,10 +60,23 @@
   <h2>3. Your recovery code</h2>
   <p><strong>Write this down on paper now</strong> and keep it apart from your password. If you lose your password, this code and your pseudonym let you set a new one yourself. It is shown only once and is not in the reply below.</p>
   <p><code id="recovery-code" class="big"></code></p>
-  <h2>4. Your invitation reply</h2>
-  <p>Your entry for the members list, with the public half of your password seal, and your GitHub username sealed so only the steward can read it.</p>
-  <pre id="entry"></pre>
-  <div class="row"><button type="button" id="copy-entry">Copy</button><button type="button" id="save-entry">Download</button></div>
+  <div id="ask-box" class="stack" hidden>
+    <h2>4. Ask to join</h2>
+    <p>Sign in to GitHub with the account you gave above, then press the button. It opens a request on GitHub with everything sealed so only the steward can read it; press <strong>Create</strong> there. The steward checks your invitation by rule and admits you within the hour. Nobody approves it by hand.</p>
+    <p><a id="ask" class="button primary" target="_blank" rel="noopener">Ask to join</a></p>
+    <details class="stack">
+      <summary>If the button does not work</summary>
+      <p>Open a new issue at <a id="ask-repo" target="_blank" rel="noopener"></a> titled <code>Join request</code>, and paste this as its text:</p>
+      <pre id="ask-body"></pre>
+      <div class="row"><button type="button" id="copy-ask">Copy</button></div>
+    </details>
+  </div>
+  <div id="reply-box" class="stack">
+    <h2>4. Your invitation reply</h2>
+    <p>Your entry for the members list, with the public half of your password seal, and your GitHub username sealed so only the steward can read it.</p>
+    <pre id="entry"></pre>
+    <div class="row"><button type="button" id="copy-entry">Copy</button><button type="button" id="save-entry">Download</button></div>
+  </div>
   <h2>5. What happens next</h2>
   <ol id="next-steps" class="stack"></ol>
 </section>

@@ -183,6 +183,18 @@ export function parseInvite(text) {
   return m ? { by: m[1], day: m[2], nonce: m[3], sig: m[4], code: `${m[2]}.${m[3]}.${m[4]}` } : null;
 }
 
+/**
+ * A request to join: the new entry and the GitHub login, signed with the new
+ * key and sealed to the steward. It goes in an issue on the intake
+ * repository, opened from that same login.
+ * @returns {Promise<string>} the sealed request (JSON)
+ */
+export async function sealedJoin(key, entry, login, stewardPem) {
+  const body = { v: 1, op: 'join', entry, login, member: entry.pseudonym, day: today(), nonce: randomHex(16) };
+  body.sig = await sshSign(key, utf8(canonicalJson(body)));
+  return JSON.stringify(await seal(body, stewardPem));
+}
+
 /** A strong random password: 20 characters in 4 groups, about 100 bits. */
 export function suggestPassword() {
   const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';

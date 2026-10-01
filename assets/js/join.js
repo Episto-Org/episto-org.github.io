@@ -3,7 +3,7 @@
 
 import { h, $, clear, download, status } from './dom.js';
 import { loadPoolsConfig, explainer, picker, entryYaml, today, poolLabel } from './pools.js';
-import { parseInvite, INVITE_DAYS, deriveKey, deriveRecoveryKey, suggestRecoveryCode, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
+import { sealedJoin, parseInvite, INVITE_DAYS, deriveKey, deriveRecoveryKey, suggestRecoveryCode, sealedRequest, suggestPassword, suggestPseudonym, MIN_PASSWORD } from '../lib/seals.js';
 import { writeBundle } from './bundle.js';
 
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
@@ -11,8 +11,14 @@ let cfg;
 const selected = new Set();
 let entry = null;
 
-function steps(e) {
+function steps(e, automatic) {
   const list = clear($('#next-steps'));
+  if (automatic) {
+    list.append(h('li', null, 'Create the request on GitHub. Within the hour the steward checks your invitation code and your inviter\'s limits, adds you to the members list and gives your GitHub account read access. It answers on the request, and says why if something is wrong.'));
+    list.append(h('li', null, 'Accept the repository invitation GitHub sends you. From then on you work on GitHub\'s website; pages that act for you ask for your Episto password.'));
+    list.append(h('li', null, 'Read the onboarding guide in the members\' repository. For your first three months you sit on panels as a shadow reviewer: your review is sealed and revealed like everyone\'s, but it does not count.'));
+    return;
+  }
   list.append(h('li', null, 'Send this reply to your inviter the same private way the invitation reached you. It holds nothing about who you are; your GitHub username in it is sealed.'));
   list.append(h('li', null, `${e.invited_by} adds it on the account page and opens a pull request. The steward checks the invitation and merges it.`));
   list.append(h('li', null, 'An admin then gives your GitHub account read access to the members\' repository. From then on you work on GitHub\'s website, signed in with your GitHub password and two-step verification. Pages that act for you ask for your Episto password.'));
@@ -63,7 +69,20 @@ async function write(ev) {
   $('#recovery-code').textContent = code;
   clear(box).append(h('span', { class: 'notice notice-ok' },
     `Your pools: ${[...selected].map((p) => poolLabel(cfg, p)).join(', ')}. They count from the day you join. Pools you add after your first ${cfg.newMemberDays} days wait ${cfg.choiceDelayDays} days before they count.`));
-  steps(entry);
+  // With an invitation code and an intake repository, joining needs nobody:
+  // the request goes straight to the steward.
+  const automatic = Boolean(cfg.sealedRegister && cfg.intakeRepo && entry.invite);
+  $('#ask-box').hidden = !automatic;
+  $('#reply-box').hidden = automatic;
+  if (automatic) {
+    const body = `Sealed join request, for the steward only.\n\n\`\`\`sealed\n${await sealedJoin(key, entry, forge, cfg.stewardKey)}\n\`\`\`\n`;
+    const repo = `https://github.com/${cfg.intakeRepo}`;
+    $('#ask').href = `${repo}/issues/new?title=${encodeURIComponent('Join request')}&body=${encodeURIComponent(body)}`;
+    $('#ask-repo').href = `${repo}/issues/new`;
+    $('#ask-repo').textContent = `${cfg.intakeRepo}/issues/new`;
+    $('#ask-body').textContent = body;
+  }
+  steps(entry, automatic);
   $('#join-out').hidden = false;
   $('#join-out').scrollIntoView({ block: 'start' });
 }
@@ -105,6 +124,7 @@ async function main() {
     $('#suggested').textContent = p;
   });
   $('#copy-entry').addEventListener('click', () => navigator.clipboard.writeText($('#entry').textContent));
+  $('#copy-ask').addEventListener('click', () => navigator.clipboard.writeText($('#ask-body').textContent));
   $('#save-entry').addEventListener('click', () => download(`episto-${entry.pseudonym}.txt`, $('#entry').textContent, 'text/plain'));
 }
 
