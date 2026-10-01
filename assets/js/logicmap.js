@@ -118,7 +118,7 @@ export function logicHelp() {
     h('summary', { 'aria-label': 'What logic trees are, and what they open up' }, '?'),
     h('div', { class: 'stack' },
       h('p', null, h('strong', null, 'A logic tree '), 'shows how an argument is built: the claim at its centre, what holds it up, where the flag lands, and what depends on it. It is written in the proposer\'s own words, so it gives the context without the paper\'s text.'),
-      h('p', null, h('strong', null, 'Open to everyone. '), 'Every tree is published under CC0 in the monthly download (data/meta/), for anyone to use: researchers, libraries, educators, and companies that build machine-learning models.'),
+      h('p', null, h('strong', null, 'Open to everyone. '), 'Every tree is in the public database under CC0, ready to download (data/meta/logic.jsonl, listed in the API), for anyone to use: researchers, libraries, educators, and companies that build machine-learning models.'),
       h('p', null, h('strong', null, 'Close at hand:')),
       h('ul', null,
         h('li', null, 'seeing at a glance which claims a study rests on, and which papers it builds on;'),

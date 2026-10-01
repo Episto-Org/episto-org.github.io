@@ -7,5 +7,12 @@
   "index": "data/index.json",
   "paper": "data/papers/{shard}.json",
   "shard": "first byte (hex) of the 32-bit FNV-1a hash of the id; id = \"doi:\" + lower-case DOI",
+  "meta": {
+    "codebook": "data/meta/README.md",
+    "counts": "data/meta/counts.csv",
+    "rounds": "data/meta/rounds.csv",
+    "logic": "data/meta/logic.jsonl",
+    "dependencies": "data/meta/dependencies.csv"
+  },
   "licence": "CC0-1.0"
 }

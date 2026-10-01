@@ -19,6 +19,8 @@
 <main id="main"><div class="wrap">
 <h1>API</h1>
 <p class="lead">Episto's data is a set of static files: no key, no account, no limit, and nothing about what you look up reaches us. Version 1 is described in <a href="data/api.json">data/api.json</a>; a later format gets a new version and v1 stays as documented here.</p>
+<h2>For meta-research and machine learning</h2>
+<p>The register is also published as tables for bulk use, free for any purpose under CC0, machine learning included: <a href="data/meta/README.md">data/meta/</a>, listed under <code>meta</code> in <code>api.json</code>. It holds counts by type, field and year, every decided round, the dependencies between papers, and the flags' logic trees (<code>logic.jsonl</code>): each argument's claims, the load-bearing claim, the failure and what follows, with the tree written as one line of logic. The files carry no personal data, and a new set comes with every monthly build.</p>
 <h2>Every flagged paper at once</h2>
 <p>Download <a href="flagged-2026-10.csv.gz">flagged-2026-10.csv.gz</a> (gzip-compressed CSV, released monthly; the columns are on the <a href="download.html">download page</a>). Checking your own lists against it keeps them on your computer.</p>
 <pre>curl -O https://episto-org.github.io/flagged-2026-10.csv.gz
