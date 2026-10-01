@@ -3,7 +3,7 @@
   "generated": "2026-10-01",
   "month": "2026-10",
   "csv": "flagged-2026-10.csv.gz",
-  "csv_sha256": "2c308a126afd957f32a9d6cd63767532dc1c0688cc97523b3bd34a818ea6faeb",
+  "csv_sha256": "d0e7c50c035d7a4ddbaaaa9ad67f4035a5b0606f8e854588635902b28d27c108",
   "index": "data/index.json",
   "paper": "data/papers/{shard}.json",
   "shard": "first byte (hex) of the 32-bit FNV-1a hash of the id; id = \"doi:\" + lower-case DOI",

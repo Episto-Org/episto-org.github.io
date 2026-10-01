@@ -21,7 +21,7 @@
 <p class="lead">Episto's data is a set of static files: no key, no account, no limit, and nothing about what you look up reaches us. Version 1 is described in <a href="data/api.json">data/api.json</a>; a later format gets a new version and v1 stays as documented here.</p>
 <h2>Every flagged paper at once</h2>
 <p>Download <a href="flagged-2026-10.csv.gz">flagged-2026-10.csv.gz</a> (gzip-compressed CSV, released monthly; the columns are on the <a href="download.html">download page</a>). Checking your own lists against it keeps them on your computer.</p>
-<pre>curl -O https://episto-org.github.io/episto-site/flagged-2026-10.csv.gz
+<pre>curl -O https://episto-org.github.io/flagged-2026-10.csv.gz
 gunzip flagged-2026-10.csv.gz</pre>
 <h2>One paper by DOI</h2>
 <p>Each paper's record sits in <code>data/papers/&lt;xx&gt;.json</code>, where <code>xx</code> is the first byte, in hex, of the 32-bit FNV-1a hash of its id, <code>doi:</code> followed by the lower-case DOI.</p>
@@ -34,11 +34,11 @@ gunzip flagged-2026-10.csv.gz</pre>
   return (h &gt;&gt;&gt; 24).toString(16).padStart(2, '0');
 }
 const id = 'doi:' + doi.toLowerCase();
-const shard = await (await fetch('https://episto-org.github.io/episto-site/data/papers/' + shardOf(id) + '.json')).json();
+const shard = await (await fetch('https://episto-org.github.io/data/papers/' + shardOf(id) + '.json')).json();
 const paper = shard[id] ?? null;   // null: not flagged</pre>
 <h2>A whole reference list</h2>
 <p>Libraries and journals can check a reference list from the command line with the same matching as the checker (DOIs, then titles):</p>
-<pre>node tools/check-list.mjs references.txt --data https://episto-org.github.io/episto-site/data --out results.csv</pre>
+<pre>node tools/check-list.mjs references.txt --data https://episto-org.github.io/data --out results.csv</pre>
 <p>The script is in Episto's code, Apache-2.0. Published data is CC0: use it for anything, with no permission needed.</p>
 </div></main>
 <footer class="site"><div class="wrap">
