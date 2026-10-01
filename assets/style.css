@@ -303,3 +303,4 @@ nav.member-tools a[aria-current="page"] { font-weight: 600; text-decoration: non
 .logic-step input[type="text"] { width: 100%; }
 .arrows-box > summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
 .more-steps > summary { cursor: pointer; color: var(--muted); }
+.logic-map .lm-order { fill: var(--accent); font: 700 17px system-ui, sans-serif; }

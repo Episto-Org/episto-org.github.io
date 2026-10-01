@@ -3,7 +3,7 @@
 // hollow ring; what connects to it orbits on the ring, the rest further out.
 // Arrows run from cause to effect; what falls with the centre is marked.
 
-import { roleOf, nodeName, edgesOf, centerOf, fallsWith, notation, calcRows, ALLOWED_TO } from '../lib/logic.js';
+import { roleOf, nodeName, edgesOf, centerOf, fallsWith, notation, calcRows, spineOf, ALLOWED_TO } from '../lib/logic.js';
 import { pretty } from '../lib/mathcheck.js';
 import { recognise } from '../lib/expressions.js';
 import { h } from './dom.js';
@@ -49,8 +49,45 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
   const near = ids.filter((id) => id !== center && edges.some((e) => (e.from === id && e.to === center) || (e.to === id && e.from === center)));
   const far = ids.filter((id) => id !== center && !near.includes(id));
 
+  const spine = spineOf(steps);
+  const pos = new Map();
+  const hubs = spine.length >= 2 ? spine : [center];
+  if (spine.length >= 2) {
+    // A machine of central claims: they run down the middle in order, each
+    // with its own ring; what connects to one sits beside it, left and right.
+    const GAP = 250;
+    const SIDE = [0, Math.PI, -0.6, Math.PI + 0.6, 0.6, Math.PI - 0.6, -1.0, Math.PI + 1.0, 1.0, Math.PI - 1.0];
+    spine.forEach((id, k) => pos.set(id, [0, k * GAP]));
+    const used = new Map(spine.map((id) => [id, 0]));
+    const hubOf = (id) => {
+      const e = edges.find((x) => (x.from === id && spine.includes(x.to)) || (x.to === id && spine.includes(x.from)));
+      return e ? (spine.includes(e.to) ? e.to : e.from) : null;
+    };
+    const rest = ids.filter((id) => !spine.includes(id));
+    for (const id of rest.filter(hubOf)) {
+      const hub = hubOf(id);
+      const k = used.get(hub);
+      used.set(hub, k + 1);
+      const a = SIDE[k % SIDE.length];
+      const [hx, hy] = pos.get(hub);
+      const r = RING * (1 + Math.floor(k / SIDE.length) * 0.6);
+      pos.set(id, [hx + r * Math.cos(a), hy + r * Math.sin(a)]);
+    }
+    let pending = rest.filter((id) => !pos.has(id));
+    for (let round = 0; pending.length && round < 5; round++) {
+      for (const id of pending) {
+        const e = edges.find((x) => (x.from === id && pos.has(x.to)) || (x.to === id && pos.has(x.from)));
+        if (!e) continue;
+        const [ax, ay] = pos.get(e.from === id ? e.to : e.from);
+        const k = used.get(id) ?? 0;
+        pos.set(id, [ax + (ax >= 0 ? 1 : -1) * 105, ay + ((pending.indexOf(id) % 3) - 1) * 55 + k]);
+      }
+      pending = pending.filter((id) => !pos.has(id));
+    }
+    pending.forEach((id, k) => pos.set(id, [-200, -150 + k * 60]));
+  } else {
   // The centre, the ring around it, and the rest placed near what they connect to.
-  const pos = new Map([[center, [0, 0]]]);
+  pos.set(center, [0, 0]);
   near.forEach((id, k) => {
     const a = -Math.PI / 2 + (2 * Math.PI * k) / Math.max(near.length, 1);
     pos.set(id, [RING * Math.cos(a), RING * Math.sin(a)]);
@@ -61,8 +98,15 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
     const base = Math.atan2(ay, ax) + (k % 2 ? 0.35 : -0.35) * Math.ceil((k + 1) / 2) * 0.5;
     pos.set(id, [OUTER * Math.cos(base), OUTER * Math.sin(base)]);
   });
+  }
 
-  const map = svg('svg', { viewBox: '-250 -250 500 500', class: 'logic-map', role: 'img', 'aria-label': `Logic map. ${notation(steps, edges)}` });
+  const xs = [...pos.values()].map(([x]) => x);
+  const ys = [...pos.values()].map(([, y]) => y);
+  const pad = 60;
+  const [minX, maxX] = [Math.min(-250, ...xs.map((x) => x - pad)), Math.max(250, ...xs.map((x) => x + pad))];
+  const edge = spine.length >= 2 ? RING + 20 : 250;
+  const [minY, maxY] = [Math.min(-edge, ...ys.map((y) => y - pad)), Math.max(spine.length >= 2 ? Math.max(...ys) + edge : 250, ...ys.map((y) => y + pad))];
+  const map = svg('svg', { viewBox: `${minX} ${minY} ${maxX - minX} ${maxY - minY}`, class: 'logic-map', role: 'img', 'aria-label': `Logic map. ${notation(steps, edges)}` });
   const defs = svg('defs');
   defs.append(
     Object.assign(svg('marker', { id: 'lm-arrow', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }), {}),
@@ -70,9 +114,9 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
   );
   defs.firstChild.append(svg('path', { d: 'M0,0 L10,5 L0,10 z', class: 'lm-head' }));
   defs.lastChild.append(svg('path', { d: 'M8,0 L8,10', class: 'lm-tee' }));
-  map.append(defs, svg('circle', { cx: 0, cy: 0, r: RING, class: 'lm-ring' }));
+  map.append(defs, ...hubs.map((id) => svg('circle', { cx: pos.get(id)[0], cy: pos.get(id)[1], r: RING, class: 'lm-ring' })));
 
-  const radius = (id) => (id === center ? 36 : 24);
+  const radius = (id) => (hubs.includes(id) || id === center ? 36 : 24);
   for (const e of edges) {
     const [x1, y1] = pos.get(e.from);
     const [x2, y2] = pos.get(e.to);
@@ -88,7 +132,7 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
     const role = id.startsWith('E') ? 'evidence' : roleOf(steps[Number(id) - 1]);
     const step = id.startsWith('E') ? null : steps[Number(id) - 1];
     const g = svg('g', {
-      class: `lm-node lm-${role}${id === center ? ' lm-center' : ''}${falls.has(id) ? ' lm-falls' : ''}${calc.get(Number(id))?.parts ? ' lm-parts' : ''}${id === selected ? ' lm-selected' : ''}`,
+      class: `lm-node lm-${role}${id === center || hubs.includes(id) ? ' lm-center' : ''}${falls.has(id) ? ' lm-falls' : ''}${calc.get(Number(id))?.parts ? ' lm-parts' : ''}${id === selected ? ' lm-selected' : ''}`,
       transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})`, tabindex: onSelect ? 0 : undefined, 'data-id': id,
     });
     g.append(
@@ -96,6 +140,8 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
       svg('circle', { r: radius(id) }),
       svg('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' }, `${name(id)}${calc.get(Number(id))?.parts ? '✗' : ''}`),
     );
+    // Its place on the spine.
+    if (spine.length >= 2 && spine.includes(id)) g.append(svg('text', { x: -44, y: -36, class: 'lm-order', 'text-anchor': 'middle' }, String(spine.indexOf(id) + 1)));
     if (onSelect) {
       g.addEventListener('click', () => onSelect(id));
       g.addEventListener('keydown', (ev) => {
@@ -121,7 +167,8 @@ export function logicMap(steps, { failLabel = 'Failure', selected = null, onSele
           ? ` ✗ the paper has ${num(calc.get(i + 1).paper)}${s.error ? `: ${s.error}` : ''}`
           : ` ✓ the paper agrees (${num(calc.get(i + 1).paper)})`)
         : null,
-      id === center ? h('span', { class: 'hint' }, ' · load-bearing') : falls.has(id) ? h('span', { class: 'hint' }, ' · falls with it') : null);
+      spine.length >= 2 && spine.includes(id) ? h('span', { class: 'hint' }, ` · central ${spine.indexOf(id) + 1} of ${spine.length}`) : null,
+      id === center ? h('span', { class: 'hint' }, ' · load-bearing: the flag breaks it') : falls.has(id) ? h('span', { class: 'hint' }, ' · falls with it') : null);
   }));
   return h('div', { class: 'logic-map-box stack' }, help ? logicHelp() : null, map, h('p', { class: 'logic-line' }, h('code', null, notation(steps, edges))), key);
 }
@@ -136,7 +183,7 @@ export function logicHelp() {
     h('div', { class: 'stack' },
       h('p', null, h('strong', null, 'How to read it')),
       h('ul', null,
-        h('li', null, h('strong', null, 'Centre: '), 'the load-bearing claim, the one the flag breaks.'),
+        h('li', null, h('strong', null, 'Centre: '), 'the load-bearing claim, the one the flag breaks. When the paper builds a machine of several central claims, they run down the middle in order (1, 2, 3...), each holding up the next: breaking one brings down all after it.'),
         h('li', null, h('strong', null, 'Arrows '), 'run from cause to effect: → supports, ⊣ breaks, ⊢ shows.'),
         h('li', null, h('strong', null, 'Letters: '), 'C claim, P another paper, M calculation, F the failure, S what follows, E evidence.'),
         h('li', null, h('strong', null, '✗ '), 'marks the calculation line where the paper\'s number or formula parts from the calculation: where the mistake happens. The machine checks it.'),

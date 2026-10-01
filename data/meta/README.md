@@ -26,6 +26,8 @@ selection. Prevalence needs a random sample: Episto projects draw one.
   where they are in the paper), never the paper's text:
   - `{"claim", "where", "rests_on"}`: what the paper claims, and on which
     evidence (numbers of the flag's evidence entries);
+    `"central"` (1, 2, 3...) puts a claim on the spine: the central claims
+    the paper builds on, in order, each holding up the next;
   - `{"cites", "for"}`: the claim rests on another paper (DOI);
   - `{"fails", "because"}`: the flag's failure, shown by which evidence;
   - `{"so"}`: what falls with it.

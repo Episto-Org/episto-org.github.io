@@ -256,6 +256,8 @@ function removeStep(row) {
   update();
 }
 
+const ordinal = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+
 /** What can be added from the step chosen on the map: only what fits there. */
 function renderActions(steps) {
   const box = clear($('#logic-actions'));
@@ -284,6 +286,42 @@ function renderActions(steps) {
   const groups = [];
   const failsAt = steps.findIndex((s) => 'fails' in s);
   if (kind === 'claim') {
+    // The spine: central claims in the order they build the paper's machine.
+    const spineRows = logicRows().filter((r) => r.dataset.central).sort((a, b) => Number(a.dataset.central) - Number(b.dataset.central));
+    const place = spineRows.indexOf(row);
+    const renumber = (order) => {
+      // The spine order replaces any arrows drawn between its claims.
+      const on = order.map((r) => logicRows().indexOf(r) + 1);
+      logicRows().forEach((r, i) => {
+        if (!on.includes(i + 1)) return;
+        r.dataset.preset = JSON.stringify((steps[i]?.to ?? []).filter((t) => !on.includes(t)));
+        clear(r.querySelector('.arrows'));
+      });
+      order.forEach((r, k) => { r.dataset.central = String(k + 1); });
+      refreshLogic();
+      update();
+    };
+    const swap = (d) => {
+      const order = [...spineRows];
+      [order[place], order[place + d]] = [order[place + d], order[place]];
+      renumber(order);
+    };
+    groups.push(h('p', { class: 'hint' }, place < 0
+      ? 'Is it one of the central claims the paper builds, in order?'
+      : `Central claim ${place + 1} of ${spineRows.length}: it holds up the next.`), h('div', { class: 'row' },
+      place < 0 ? btn(`Put it on the spine (${ordinal(spineRows.length + 1)})`, () => renumber([...spineRows, row]))
+        : btn('Take it off the spine', () => {
+          delete row.dataset.central;
+          renumber(spineRows.filter((r) => r !== row));
+        }),
+      place >= 0 ? btn('The next central claim', () => {
+        addStep('claim');
+        const added = logicRows().at(-1);
+        added.dataset.central = String(place + 1.5);
+        renumber([...spineRows.slice(0, place + 1), added, ...spineRows.slice(place + 1)]);
+      }, 'primary') : null,
+      place > 0 ? btn('Earlier', () => swap(-1)) : null,
+      place >= 0 && place < spineRows.length - 1 ? btn('Later', () => swap(1)) : null));
     groups.push(h('p', { class: 'hint' }, 'What does it rest on?'), h('div', { class: 'row' },
       btn('Another claim', () => addStep('claim', { to: [n] })),
       btn('Another paper', () => addStep('cites', { to: [n] })),
@@ -315,13 +353,15 @@ function renderActions(steps) {
 /** Steps as written so far, with their arrows (for the map, before checking). */
 function draftSteps() {
   const numbers = (v) => v.split(/[\s,]+/).filter(Boolean).map(Number).filter(Number.isInteger);
+  // The spine's order, renumbered 1, 2, 3... whatever was removed between.
+  const spine = logicRows().filter((r) => r.dataset.central).sort((a, b) => Number(a.dataset.central) - Number(b.dataset.central));
   return [...document.querySelectorAll('#logic .logic-step')].map((row) => {
     const get = (name) => row.querySelector(`[data-name="${name}"]`)?.value.trim() ?? '';
     const drawn = row.querySelectorAll('.arrows input');
     const to = drawn.length ? [...row.querySelectorAll('.arrows input:checked')].map((c) => Number(c.value)) : JSON.parse(row.dataset.preset ?? '[]');
     const arrows = to.length ? { to } : {};
     const kind = row.dataset.kind;
-    if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}), ...arrows };
+    if (kind === 'claim') return { claim: get('claim'), where: get('where'), ...(get('rests_on') ? { rests_on: numbers(get('rests_on')) } : {}), ...(row.dataset.central ? { central: spine.indexOf(row) + 1 } : {}), ...arrows };
     if (kind === 'cites') return { cites: get('cites'), ...(get('for') ? { for: get('for') } : {}), ...arrows };
     if (kind === 'calc') return { calc: get('calc'), ...(get('why') ? { why: get('why') } : {}), ...(get('paper') ? { paper: get('paper') } : {}), ...(get('error') ? { error: get('error') } : {}), ...arrows };
     if (kind === 'fails') return { fails: `${category?.id}.${current?.id}`, because: numbers(get('because')), ...arrows };
@@ -354,7 +394,7 @@ function refreshLogic(arrows = true) {
         : `= ${Number(r.value.toPrecision(6))}${r.paper === null ? '' : r.parts ? `  ✗ the paper has ${Number(r.paper.toPrecision(6))}: this is where it parts` : '  ✓ the paper agrees'}`;
   });
   rows.forEach((row, i) => {
-    row.querySelector('.step-name').textContent = `${LETTER[row.dataset.kind]}${i + 1}`;
+    row.querySelector('.step-name').textContent = `${LETTER[row.dataset.kind]}${i + 1}${steps[i].central ? ` · central ${steps[i].central}` : ''}`;
     row.classList.toggle('is-selected', selectedStep === String(i + 1));
     if (!arrows) return;
     const box = clear(row.querySelector('.arrows'));

@@ -32,6 +32,17 @@ export function nodeName(steps, i) {
   return `${ROLE_LETTER[roleOf(steps[i])]}${i + 1}`;
 }
 
+/**
+ * The spine: claims marked central, in their order. Together they are the
+ * machine the paper builds, each holding up the next; a failure on one
+ * brings down every later one.
+ * @returns step numbers as strings, in spine order
+ */
+export function spineOf(steps) {
+  return steps.map((s, i) => [s, i]).filter(([s]) => roleOf(s) === 'claim' && Number.isInteger(s.central))
+    .sort((a, b) => a[0].central - b[0].central).map(([, i]) => String(i + 1));
+}
+
 /** The calculation steps checked together: rows by step number. */
 export function calcRows(steps) {
   const at = steps.map((s, i) => (roleOf(s) === 'calc' ? i : -1)).filter((i) => i >= 0);
@@ -67,6 +78,11 @@ export function edgesOf(steps) {
     }
     for (const t of to ?? []) edges.push({ from: id, to: String(t), kind: role === 'fails' ? 'breaks' : 'supports' });
   });
+  // The spine: each central claim holds up the next.
+  const spine = spineOf(steps);
+  for (let k = 1; k < spine.length; k++) {
+    if (!edges.some((e) => e.from === spine[k - 1] && e.to === spine[k])) edges.push({ from: spine[k - 1], to: spine[k], kind: 'supports' });
+  }
   // Calculations: each line from the lines whose names it uses; the lines
   // where the paper parts from the calculation show the failure.
   const { byStep } = calcRows(steps);
