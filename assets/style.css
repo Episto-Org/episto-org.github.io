@@ -99,7 +99,7 @@ footer.site ul { list-style: none; display: flex; flex-wrap: wrap; gap: .25rem 1
 label { font-weight: 600; }
 .hint { color: var(--muted); font-size: .9rem; font-weight: 400; }
 
-textarea, input[type="text"], input[type="search"], input[type="number"], input[type="url"], select {
+textarea, input[type="text"], input[type="password"], input[type="search"], input[type="number"], input[type="url"], select {
   font: inherit; color: var(--text); background: var(--bg);
   border: 1px solid var(--border); border-radius: 6px; padding: .5rem .6rem; max-width: 100%;
 }
@@ -304,3 +304,18 @@ nav.member-tools a[aria-current="page"] { font-weight: 600; text-decoration: non
 .arrows-box > summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
 .more-steps > summary { cursor: pointer; color: var(--muted); }
 .logic-map .lm-order { fill: var(--accent); font: 700 17px system-ui, sans-serif; }
+
+/* Forms read top to bottom: a label, its hint, then the field. */
+.panel input[type="text"], .panel input[type="password"] { display: block; width: 100%; max-width: 26rem; margin-top: .3rem; }
+.panel .row input[type="text"] { display: inline-block; width: auto; flex: 1 1 12rem; min-width: 0; margin-top: 0; }
+.panel input.wide { max-width: 100%; }
+a.tile { display: block; color: inherit; text-decoration: none; }
+a.tile strong { color: var(--accent); }
+.legend td:first-child { white-space: nowrap; width: 1%; }
+@media (max-width: 520px) {
+  .legend td { display: block; border-bottom: 0; padding-bottom: 0; }
+  .legend td:first-child { width: auto; white-space: normal; }
+  .legend td + td { padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
+  .row > button, .row > .button { flex: 1 1 auto; }
+}
+.panel input + .row { margin-top: .5rem; }
